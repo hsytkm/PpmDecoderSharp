@@ -3,10 +3,12 @@
 public class ReadImageTest
 {
     [Theory]
-#if false
     // P1
-    [InlineData(Consts.ImagePathP1_1, 136, 82, 1, null)]
+    [InlineData(Consts.ImagePathP1_1, 200, 200, 1, "ASCII PBM file created by PBMA_WRITE.")]
     [InlineData(Consts.ImagePathP1_2, 24, 7, 1, "feep.pbm")]
+    [InlineData(Consts.ImagePathP1_3, 25, 25, 1, "letter_a.pbma")]
+    [InlineData(Consts.ImagePathP1_4, 136, 82, 1, null)]
+#if false
     // P2
     [InlineData(Consts.ImagePathP2_1, 24, 7, 15, "feep.ascii.pgm")]
     [InlineData(Consts.ImagePathP2_2, 400, 200, 252, "test02.pgm")]

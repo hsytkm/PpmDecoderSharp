@@ -21,9 +21,6 @@ Decode Portable PixMap (ppm) images in C#
 
 #### P1
 
-1. 未実装
-2. 画素中のコメント
-
 #### P2
 
 1. 未実装

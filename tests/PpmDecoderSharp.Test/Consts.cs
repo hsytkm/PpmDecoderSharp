@@ -2,8 +2,10 @@
 
 internal static class Consts
 {
-    internal const string ImagePathP1_1 = @"Assets\P1-scs.ascii.pbm";
+    internal const string ImagePathP1_1 = @"Assets\P1-comment-circle.ascii.pbm";
     internal const string ImagePathP1_2 = @"Assets\P1-comment-feep.ascii.pbm";
+    internal const string ImagePathP1_3 = @"Assets\P1-comment-letter_a.ascii.pbm";
+    internal const string ImagePathP1_4 = @"Assets\P1-scs.ascii.pbm";
 
     internal const string ImagePathP2_1 = @"Assets\P2-15-comment-feep.ascii.pgm";
     internal const string ImagePathP2_2 = @"Assets\P2-252-comment-tracks.ascii.pgm";
