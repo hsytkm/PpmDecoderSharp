@@ -46,9 +46,9 @@ public sealed record PpmImage
             PpmHeader.PixmapFormat.P6 => ReadLevelPixelsAsync(stream, header, cancellationToken),
             _ => throw new NotSupportedException($"Unsupported Format : {header.Format}")
         };
-        byte[] bs = await readPixelsTask;
+        byte[] pixels = await readPixelsTask;
 
-        return new PpmImage(header, bs);
+        return new PpmImage(header, pixels);
     }
 
     // P4
@@ -59,21 +59,21 @@ public sealed record PpmImage
 
         int dstPixelSize = header.ImageSize;
         int srcPixelSize = (dstPixelSize + (8 - 1)) / 8;    // Ceiling
-        byte[] tempBytes = ArrayPool<byte>.Shared.Rent(srcPixelSize);
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(srcPixelSize);
 
         try
         {
             stream.Position = header.PixelOffset;
-            int readSize = await stream.ReadAsync(tempBytes.AsMemory()[..srcPixelSize], cancellationToken);
+            int readSize = await stream.ReadAsync(buffer.AsMemory(0, srcPixelSize), cancellationToken);
             if (readSize != srcPixelSize)
                 throw new NotImplementedException($"Unable to load the intended size. Expected={srcPixelSize}, Actual={readSize}");
 
-            var bs = new byte[dstPixelSize];
+            var pixels = new byte[dstPixelSize];
 
             unsafe
             {
-                fixed (byte* srcHeadPtr = tempBytes)
-                fixed (byte* destHeadPtr = bs)
+                fixed (byte* srcHeadPtr = buffer)
+                fixed (byte* destHeadPtr = pixels)
                 {
                     byte* srcTailPtr = srcHeadPtr + srcPixelSize;
                     byte* dest = destHeadPtr;
@@ -90,11 +90,11 @@ public sealed record PpmImage
                     }
                 }
             }
-            return bs;
+            return pixels;
         }
         finally
         {
-            ArrayPool<byte>.Shared.Return(tempBytes);
+            ArrayPool<byte>.Shared.Return(buffer);
         }
     }
 
@@ -105,13 +105,13 @@ public sealed record PpmImage
             throw new NotSupportedException($"Not supported max level: {header.MaxLevel}");
 
         int pixelSize = header.ImageSize;
-        var bs = new byte[pixelSize];
+        var pixels = new byte[pixelSize];
 
         stream.Position = header.PixelOffset;
-        int readSize = await stream.ReadAsync(bs, cancellationToken);
+        int readSize = await stream.ReadAsync(pixels, cancellationToken);
         if (readSize != pixelSize)
             throw new NotImplementedException($"Unable to load the intended size. Expected={pixelSize}, Actual={readSize}");
 
-        return bs;
+        return pixels;
     }
 }

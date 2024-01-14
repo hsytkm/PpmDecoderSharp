@@ -19,15 +19,20 @@ public partial class MainWindowViewModel : ObservableObject
     private async Task ReadImageAsync()
     {
         var filePath = ImageFilePath;
-        if (filePath[0] == '"' && filePath[^1] == '"')
+        if (filePath.Length > 2 && filePath[0] == '"' && filePath[^1] == '"')
             filePath = filePath[1..^1];
 
         var ppm = await PpmImage.ReadAsync(filePath);
-        if (ppm is null)
-            return;
-
-        PpmProp = new PpmProperty(ppm);
-        ImageSource = PpmImageExtensions.ToBitmapSource(ppm);
+        if (ppm is not null)
+        {
+            PpmProp = new PpmProperty(ppm);
+            ImageSource = ppm.ToBitmapSource();
+        }
+        else
+        {
+            PpmProp = null;
+            ImageSource = null;
+        }
     }
 }
 

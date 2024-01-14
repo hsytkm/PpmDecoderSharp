@@ -3,17 +3,19 @@
 public class ReadImageTest
 {
     [Theory]
+#if false
     // P1
-    //[InlineData(Consts.ImagePathP1_1)]
-    //[InlineData(Consts.ImagePathP1_2)]
+    [InlineData(Consts.ImagePathP1_1, 136, 82, 1, null)]
+    [InlineData(Consts.ImagePathP1_2, 24, 7, 1, "feep.pbm")]
     // P2
-    //[InlineData(Consts.ImagePathP2_1)]
-    //[InlineData(Consts.ImagePathP2_2)]
-    //[InlineData(Consts.ImagePathP2_3)]
-    //[InlineData(Consts.ImagePathP2_4)]
+    [InlineData(Consts.ImagePathP2_1, 24, 7, 15, "feep.ascii.pgm")]
+    [InlineData(Consts.ImagePathP2_2, 400, 200, 252, "test02.pgm")]
+    [InlineData(Consts.ImagePathP2_3, 600, 600, 255, null)]
+    [InlineData(Consts.ImagePathP2_4, 300, 246, 255, "fred.pgm created by PGMA_IO::PGMA_WRITE.")]
     // P3
-    //[InlineData(Consts.ImagePathP3_1)]
-    //[InlineData(Consts.ImagePathP3_2)]
+    [InlineData(Consts.ImagePathP3_1, 300, 300, 244, "pbmlib.ppma created by PPMLIB(PPMA_WRITE).")]
+    [InlineData(Consts.ImagePathP3_2, 256, 256, 255, "snail.ppm")]
+#endif
     // P4
     [InlineData(Consts.ImagePathP4_1, 24, 7, 1, "feep.pbm")]
     [InlineData(Consts.ImagePathP4_2, 136, 82, 1, null)]

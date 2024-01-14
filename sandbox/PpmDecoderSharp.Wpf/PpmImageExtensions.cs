@@ -9,7 +9,7 @@ public static class PpmImageExtensions
 {
     private const double Dpi = 96.0;
 
-    public static BitmapSource ToBitmapSource(PpmImage ppm, bool isFreeze = true)
+    public static BitmapSource ToBitmapSource(this PpmImage ppm, bool isFreeze = true)
     {
         if (ppm.MaxLevel > 255)
             throw new NotSupportedException("Ppm max level must be 1byte.");
