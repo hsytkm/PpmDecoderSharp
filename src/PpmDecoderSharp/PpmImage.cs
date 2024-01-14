@@ -46,7 +46,7 @@ public sealed record PpmImage
             PpmHeader.PixmapFormat.P3 => throw new NotImplementedException("P3"),
             PpmHeader.PixmapFormat.P4 => ReadBinaryPixelsAsync(stream, header, cancellationToken),
             PpmHeader.PixmapFormat.P5 or
-            PpmHeader.PixmapFormat.P6 => ReadLevelPixelsAsync(stream, header, cancellationToken),
+            PpmHeader.PixmapFormat.P6 => ReadValuePixelsAsync(stream, header, cancellationToken),
             _ => throw new NotSupportedException($"Unsupported Format : {header.Format}")
         });
 
@@ -96,24 +96,20 @@ public sealed record PpmImage
                     if (isInComment)
                         continue;
 
-                    if (b is (byte)'0')
+                    switch (b)
                     {
-                        pixels[writeIndex++] = 0;
-                    }
-                    else if (b is (byte)'1')
-                    {
-                        pixels[writeIndex++] = 1;
-                    }
-                    else
-                    {
-                        if (b is (byte)' ' or (byte)'\t')
-                        {
-                            // skip
-                        }
-                        else
-                        {
+                        case (byte)'0':
+                            pixels[writeIndex++] = 0;
+                            break;
+                        case (byte)'1':
+                            pixels[writeIndex++] = 1;
+                            break;
+                        case (byte)' ':
+                        case (byte)'\t':
+                            break;
+                        default:
                             Debug.WriteLine($"Ignore text : {(char)b} (0x{b:X2})");
-                        }
+                            break;
                     }
                 }
             }
@@ -134,36 +130,53 @@ public sealed record PpmImage
         if (header.MaxLevel != 1)
             throw new NotSupportedException($"Not supported max level : {header.MaxLevel}");
 
-        int dstPixelSize = header.ImageSize;
-        int srcPixelSize = (dstPixelSize + (8 - 1)) / 8;    // Ceiling
-        byte[] buffer = ArrayPool<byte>.Shared.Rent(srcPixelSize);
-
+        (int imageWidth, int imageHeight) = (header.Width, header.Height);
+        int srcStride = (imageWidth + (8 - 1)) / 8;   // Ceiling
+        int srcSize = imageHeight * srcStride;
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(srcSize);
         try
         {
             stream.Position = header.PixelOffset;
-            int readSize = await stream.ReadAsync(buffer.AsMemory(0, srcPixelSize), cancellationToken);
-            if (readSize != srcPixelSize)
-                throw new NotImplementedException($"Unable to load the intended size. Expected={srcPixelSize}, Actual={readSize}");
+            int readSize = await stream.ReadAsync(buffer.AsMemory(0, srcSize), cancellationToken);
+            if (readSize != srcSize)
+                throw new NotImplementedException($"Unable to load the intended size. Expected={srcSize}, Actual={readSize}");
 
-            var pixels = new byte[dstPixelSize];
-
+            var pixels = new byte[header.ImageSize];
             unsafe
             {
-                fixed (byte* srcHeadPtr = buffer)
                 fixed (byte* destHeadPtr = pixels)
+                fixed (byte* srcHeadPtr = buffer)
                 {
-                    byte* srcTailPtr = srcHeadPtr + srcPixelSize;
                     byte* dest = destHeadPtr;
-                    for (byte* p = srcHeadPtr; p < srcTailPtr; p++)
+                    byte* srcRowHeadPtr = srcHeadPtr;
+                    (int srcWidthMax, int remainder) = Math.DivRem(imageWidth, 8);
+
+                    for (int y = 0; y < imageHeight; y++)
                     {
-                        *(dest++) = ((*p & 0x80) is 0) ? (byte)0 : (byte)1;
-                        *(dest++) = ((*p & 0x40) is 0) ? (byte)0 : (byte)1;
-                        *(dest++) = ((*p & 0x20) is 0) ? (byte)0 : (byte)1;
-                        *(dest++) = ((*p & 0x10) is 0) ? (byte)0 : (byte)1;
-                        *(dest++) = ((*p & 0x08) is 0) ? (byte)0 : (byte)1;
-                        *(dest++) = ((*p & 0x04) is 0) ? (byte)0 : (byte)1;
-                        *(dest++) = ((*p & 0x02) is 0) ? (byte)0 : (byte)1;
-                        *(dest++) = ((*p & 0x01) is 0) ? (byte)0 : (byte)1;
+                        byte* srcRowTailPtr = srcRowHeadPtr + srcWidthMax;
+
+                        for (byte* p = srcRowHeadPtr; p < srcRowTailPtr; p++)
+                        {
+                            *(dest++) = ((*p & 0x80) is 0) ? (byte)0 : (byte)1;
+                            *(dest++) = ((*p & 0x40) is 0) ? (byte)0 : (byte)1;
+                            *(dest++) = ((*p & 0x20) is 0) ? (byte)0 : (byte)1;
+                            *(dest++) = ((*p & 0x10) is 0) ? (byte)0 : (byte)1;
+                            *(dest++) = ((*p & 0x08) is 0) ? (byte)0 : (byte)1;
+                            *(dest++) = ((*p & 0x04) is 0) ? (byte)0 : (byte)1;
+                            *(dest++) = ((*p & 0x02) is 0) ? (byte)0 : (byte)1;
+                            *(dest++) = ((*p & 0x01) is 0) ? (byte)0 : (byte)1;
+                        }
+
+                        if (remainder > 0)
+                        {
+                            const byte start = 0x80;
+                            byte end = (byte)(start >> remainder);
+
+                            for (int mask = start; mask > end; mask >>= 1)
+                                *(dest++) = ((*srcRowTailPtr & mask) is 0) ? (byte)0 : (byte)1;
+                        }
+
+                        srcRowHeadPtr += srcStride;
                     }
                 }
             }
@@ -176,7 +189,7 @@ public sealed record PpmImage
     }
 
     // P5/P6
-    private static async Task<byte[]> ReadLevelPixelsAsync(Stream stream, PpmHeader header, CancellationToken cancellationToken)
+    private static async Task<byte[]> ReadValuePixelsAsync(Stream stream, PpmHeader header, CancellationToken cancellationToken)
     {
         if (header.Format is not (PpmHeader.PixmapFormat.P5 or PpmHeader.PixmapFormat.P6))
             throw new NotSupportedException($"Not supported format : {header.Format}");
@@ -194,4 +207,5 @@ public sealed record PpmImage
 
         return pixels;
     }
+
 }

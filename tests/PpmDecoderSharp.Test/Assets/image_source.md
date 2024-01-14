@@ -3,15 +3,14 @@
 1. P1
 
    - [PBMA Files](https://people.sc.fsu.edu/~jburkardt/data/pbma/pbma.html)
-
-     1. [P1-comment-circle.ascii.pbm](https://people.sc.fsu.edu/~jburkardt/data/pbma/circle.ascii.pbm)
+     1. [P1-comment-circle.ascii.pbm](https://people.sc.fsu.edu/~jburkardt/data/pbma/circle.ascii.pbm)  画素の中にコメント
      
      2. [P1-comment-feep.ascii.pbm](https://people.sc.fsu.edu/~jburkardt/data/pbma/feep.ascii.pbm)
      
-     3. [P1-comment-letter_a.ascii.pbm](https://people.sc.fsu.edu/~jburkardt/data/pbma/letter_a.ascii.pbm)
+     3. [P1-comment-letter_a.ascii.pbm](https://people.sc.fsu.edu/~jburkardt/data/pbma/letter_a.ascii.pbm) 画素間の区切りなし
      
      4. [P1-scs.ascii.pbm](https://people.sc.fsu.edu/~jburkardt/data/pbma/scs.png)
-
+   
 2. P2
 
    - [PGMA Files - ASCII PGM Files (Portable Gray Map)](https://people.sc.fsu.edu/~jburkardt/data/pgma/pgma.html)
@@ -36,8 +35,11 @@
 
    - [PBMB Files](https://people.sc.fsu.edu/~jburkardt/data/pbmb/pbmb.html)
 
-     - [P4-comment-feep.pbm](https://people.sc.fsu.edu/~jburkardt/data/pbmb/feep.pbm)
-     - [P4-scs.pbm](https://people.sc.fsu.edu/~jburkardt/data/pbmb/scs.pbm)
+     1. [P4-comment_letter_a.pbm](https://people.sc.fsu.edu/~jburkardt/data/pbmb/letter_a.pbm)  幅が8の倍数でない
+     
+     2. [P4-comment-feep.pbm](https://people.sc.fsu.edu/~jburkardt/data/pbmb/feep.pbm)
+     
+     3. [P4-scs.pbm](https://people.sc.fsu.edu/~jburkardt/data/pbmb/scs.pbm)
 
 5. P5
 

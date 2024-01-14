@@ -16,13 +16,13 @@ public partial class MainWindowViewModel : ObservableObject
     private BitmapSource? _imageSource;
 
     [RelayCommand]
-    private async Task ReadImageAsync()
+    private async Task ReadImageAsync(CancellationToken cancellationToken)
     {
         var filePath = ImageFilePath;
         if (filePath.Length > 2 && filePath[0] == '"' && filePath[^1] == '"')
             filePath = filePath[1..^1];
 
-        var ppm = await PpmImage.ReadAsync(filePath);
+        var ppm = await PpmImage.ReadAsync(filePath, cancellationToken);
         if (ppm is not null)
         {
             PpmProp = new PpmProperty(ppm);

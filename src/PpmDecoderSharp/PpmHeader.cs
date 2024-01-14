@@ -30,7 +30,7 @@ internal sealed partial record PpmHeader(
         PixmapFormat.P1 or PixmapFormat.P4 => 1,    // B/W
         PixmapFormat.P2 or PixmapFormat.P5 => 1,    // Gray
         PixmapFormat.P3 or PixmapFormat.P6 => 3,    // RGB
-        _ => 0
+        _ => throw new NotSupportedException($"Not supported format : {Format}")
     };
 
     public int BytesPerChannel => (MaxLevel / 256) + 1;

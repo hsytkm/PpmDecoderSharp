@@ -19,8 +19,9 @@ public class ReadImageTest
     [InlineData(Consts.ImagePathP3_2, 256, 256, 255, "snail.ppm")]
 #endif
     // P4
-    [InlineData(Consts.ImagePathP4_1, 24, 7, 1, "feep.pbm")]
-    [InlineData(Consts.ImagePathP4_2, 136, 82, 1, null)]
+    [InlineData(Consts.ImagePathP4_1, 25, 25, 1, "letter_a.pbma")]
+    [InlineData(Consts.ImagePathP4_2, 24, 7, 1, "feep.pbm")]
+    [InlineData(Consts.ImagePathP4_3, 136, 82, 1, null)]
     // P5
     [InlineData(Consts.ImagePathP5_1, 24, 7, 15, null)]
     [InlineData(Consts.ImagePathP5_2, 512, 512, 255, null)]

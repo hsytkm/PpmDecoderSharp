@@ -11,9 +11,6 @@ public static class PpmImageExtensions
 
     public static BitmapSource ToBitmapSource(this PpmImage ppm, bool isFreeze = true)
     {
-        if (ppm.MaxLevel > 255)
-            throw new NotSupportedException("Ppm max level must be 1byte.");
-
         var bitmap = (ppm.Channels, ppm.BytesPerChannel, ppm.MaxLevel) switch
         {
             (1, 1, 255) => ToBitmapSource1ByteMax255(ppm, PixelFormats.Gray8),
@@ -47,11 +44,12 @@ public static class PpmImageExtensions
     // Byte=1/MaxLv<255
     private static unsafe BitmapSource ToBitmapSource1ByteMaxUnder255(PpmImage ppm, in PixelFormat pixelFormat)
     {
+        ArgumentOutOfRangeException.ThrowIfLessThan(ppm.MaxLevel, 1, nameof(ppm.MaxLevel));
         ArgumentOutOfRangeException.ThrowIfGreaterThan(ppm.MaxLevel, 255, nameof(ppm.MaxLevel));
 
         float ratio = 255f / ppm.MaxLevel;
         int pixelSize = ppm.Stride * ppm.Height;
-        byte[] bs = ArrayPool<byte>.Shared.Rent(pixelSize);
+        byte[] pixels = ArrayPool<byte>.Shared.Rent(pixelSize);
 
         try
         {
@@ -59,11 +57,11 @@ public static class PpmImageExtensions
 
             fixed (byte* srcPtr = &refBytes)
             {
-                Marshal.Copy((IntPtr)srcPtr, bs, 0, pixelSize);
+                Marshal.Copy((IntPtr)srcPtr, pixels, 0, pixelSize);
             }
 
             // Level normalization
-            fixed (byte* headPtr = bs)
+            fixed (byte* headPtr = pixels)
             {
                 // Memory is assumed to be contiguous.
                 byte* tailPtr = headPtr + pixelSize;
@@ -73,11 +71,11 @@ public static class PpmImageExtensions
 
             return BitmapSource.Create(
                 ppm.Width, ppm.Height, Dpi, Dpi, pixelFormat, null,
-                bs, ppm.Stride);
+                pixels, ppm.Stride);
         }
         finally
         {
-            ArrayPool<byte>.Shared.Return(bs);
+            ArrayPool<byte>.Shared.Return(pixels);
         }
     }
     

@@ -2,6 +2,7 @@
 
 internal static class Consts
 {
+    // see image_source.md
     internal const string ImagePathP1_1 = @"Assets\P1-comment-circle.ascii.pbm";
     internal const string ImagePathP1_2 = @"Assets\P1-comment-feep.ascii.pbm";
     internal const string ImagePathP1_3 = @"Assets\P1-comment-letter_a.ascii.pbm";
@@ -15,8 +16,9 @@ internal static class Consts
     internal const string ImagePathP3_1 = @"Assets\P3-255-comment-pbmlib.ascii.ppm";
     internal const string ImagePathP3_2 = @"Assets\P3-255-comment-snail.ascii.ppm";
 
-    internal const string ImagePathP4_1 = @"Assets\P4-comment-feep.pbm";
-    internal const string ImagePathP4_2 = @"Assets\P4-scs.pbm";
+    internal const string ImagePathP4_1 = @"Assets\P4-comment_letter_a.pbm";
+    internal const string ImagePathP4_2 = @"Assets\P4-comment-feep.pbm";
+    internal const string ImagePathP4_3 = @"Assets\P4-scs.pbm";
 
     internal const string ImagePathP5_1 = @"Assets\P5-15-feep.pgm";
     internal const string ImagePathP5_2 = @"Assets\P5-255-baboon.pgm";

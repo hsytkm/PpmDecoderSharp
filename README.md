@@ -6,14 +6,14 @@ Decode Portable PixMap (ppm) images in C#
 
 ### Portable PixMap
 
-| Magic Number | Type | Extension | Image Type | **Encoding** |
-| ------------ | ---- | --------- | ---------- | ------------ |
-| P1           | PBM  | .pbm      | B/W        | ASCII        |
-| P2           | PGM  | .pgm      | Gray       | ASCII        |
-| P3           | PPM  | .ppm      | RGB        | ASCII        |
-| P4           | PBM  | .pbm      | B/W        | Binary       |
-| P5           | PGM  | .pgm      | Gray       | Binary       |
-| P6           | PPM  | .ppm      | RGB        | Binary       |
+| Magic Number | Type | Extension | Image Type | Encoding |
+| ------------ | ---- | --------- | ---------- | -------- |
+| P1           | PBM  | .pbm      | B/W        | ASCII    |
+| P2           | PGM  | .pgm      | Gray       | ASCII    |
+| P3           | PPM  | .ppm      | RGB        | ASCII    |
+| P4           | PBM  | .pbm      | B/W        | Binary   |
+| P5           | PGM  | .pgm      | Gray       | Binary   |
+| P6           | PPM  | .ppm      | RGB        | Binary   |
 
 
 
@@ -25,15 +25,15 @@ Decode Portable PixMap (ppm) images in C#
 
 1. 未実装
 2. 画素中のコメント
+3. MaxLevel 255超 (BigEndian)
 
 #### P3
 
 1. 未実装
 2. 画素中のコメント
+3. MaxLevel 255超 (BigEndian)
 
 #### P4
-
-1. 画像幅が8の倍数以外
 
 #### P5
 
