@@ -5,7 +5,7 @@ namespace PpmDecoderSharp;
 
 public sealed record PpmImage
 {
-    private const int TextBufferSize = 4096;
+    private const int PixelTextBufferSize = 4096;
 
     private readonly PpmHeader _header;
     private readonly byte[] _pixels;
@@ -29,8 +29,16 @@ public sealed record PpmImage
         if (!File.Exists(filePath))
             return null;
 
-        using var stream = File.OpenRead(filePath);
-        return await ReadAsync(stream, cancellationToken);
+        try
+        {
+            using var stream = File.OpenRead(filePath);
+            return await ReadAsync(stream, cancellationToken);
+        }
+        catch (IOException)
+        {
+            Debug.WriteLine("The file may be open by another process.");
+            return null;
+        }
     }
 
     public static async Task<PpmImage?> ReadAsync(Stream stream, CancellationToken cancellationToken = default)
@@ -42,8 +50,8 @@ public sealed record PpmImage
         byte[] pixels = await (header.Format switch
         {
             PpmHeader.PixmapFormat.P1 => ReadBinaryTextPixelsAsync(stream, header, cancellationToken),
-            PpmHeader.PixmapFormat.P2 => throw new NotImplementedException("P2"),
-            PpmHeader.PixmapFormat.P3 => throw new NotImplementedException("P3"),
+            PpmHeader.PixmapFormat.P2 or
+            PpmHeader.PixmapFormat.P3 => ReadValueTextPixelsAsync(stream, header, cancellationToken),
             PpmHeader.PixmapFormat.P4 => ReadBinaryPixelsAsync(stream, header, cancellationToken),
             PpmHeader.PixmapFormat.P5 or
             PpmHeader.PixmapFormat.P6 => ReadValuePixelsAsync(stream, header, cancellationToken),
@@ -63,7 +71,7 @@ public sealed record PpmImage
             throw new NotSupportedException($"Not supported max level : {header.MaxLevel}");
 
         int pixelSize = header.ImageSize;
-        byte[] buffer = ArrayPool<byte>.Shared.Rent(TextBufferSize);
+        byte[] pixelTextBuffer = ArrayPool<byte>.Shared.Rent(PixelTextBufferSize);
         var pixels = new byte[pixelSize];
         try
         {
@@ -72,26 +80,25 @@ public sealed record PpmImage
 
             int readCount;
             stream.Position = header.PixelOffset;
-            while ((readCount = await stream.ReadAsync(buffer, cancellationToken)) != 0)
+            while ((readCount = await stream.ReadAsync(pixelTextBuffer, cancellationToken)) != 0)
             {
                 for (int i = 0; i < readCount; i++)
                 {
-                    byte b = buffer[i];
+                    byte b = pixelTextBuffer[i];
 
-                    // Goto next line
+                    // Skip comment in pixel text.
                     if (b is (byte)'\r' or (byte)'\n')
                     {
                         needCommentCheck = true;
                         isInComment = false;
-                        continue;
                     }
-
-                    // Skip comment in pixel text.
-                    if (needCommentCheck && b is (byte)'#')
+                    else
                     {
-                        isInComment = true;
+                        if (needCommentCheck && b is (byte)'#')
+                            isInComment = true;
+
+                        needCommentCheck = false;
                     }
-                    needCommentCheck = false;
 
                     if (isInComment)
                         continue;
@@ -117,7 +124,90 @@ public sealed record PpmImage
         }
         finally
         {
-            ArrayPool<byte>.Shared.Return(buffer);
+            ArrayPool<byte>.Shared.Return(pixelTextBuffer);
+        }
+    }
+
+    // P2/P3
+    private static async Task<byte[]> ReadValueTextPixelsAsync(Stream stream, PpmHeader header, CancellationToken cancellationToken)
+    {
+        if (header.Format is not (PpmHeader.PixmapFormat.P2 or PpmHeader.PixmapFormat.P3))
+            throw new NotSupportedException($"Not supported format : {header.Format}");
+
+        if (header.MaxLevel > 255)
+            throw new NotSupportedException($"Not supported max level : {header.MaxLevel}");
+
+        int pixelSize = header.ImageSize;
+        byte[] pixelTextBuffer = ArrayPool<byte>.Shared.Rent(PixelTextBufferSize);
+        byte[] wordTextBuffer = ArrayPool<byte>.Shared.Rent(16);   // Even 2 Bytes depth can fit in 5 Bytes.
+        var pixels = new byte[pixelSize];
+        try
+        {
+            int pixelWriteIndex = 0, wordTextWriteIndex = 0;
+            bool needCommentCheck = true, isInComment = false;
+
+            int readCount;
+            stream.Position = header.PixelOffset;
+            while ((readCount = await stream.ReadAsync(pixelTextBuffer, cancellationToken)) != 0)
+            {
+                for (int i = 0; i < readCount; i++)
+                {
+                    byte b = pixelTextBuffer[i];
+
+                    // Skip comment in pixel text.
+                    if (b is (byte)'\r' or (byte)'\n')
+                    {
+                        needCommentCheck = true;
+                        isInComment = false;
+                    }
+                    else
+                    {
+                        if (needCommentCheck && b is (byte)'#')
+                            isInComment = true;
+
+                        needCommentCheck = false;
+                    }
+
+                    if (isInComment)
+                        continue;
+
+                    if ((byte)'0' <= b && b <= (byte)'9')
+                    {
+                        wordTextBuffer[wordTextWriteIndex++] = b;
+                    }
+                    else if (b is (byte)' ' or (byte)'\t' or (byte)'\r' or (byte)'\n')
+                    {
+                        if (wordTextWriteIndex > 0)
+                        {
+                            var text = System.Text.Encoding.ASCII.GetString(wordTextBuffer.AsSpan()[0..wordTextWriteIndex]);
+                            wordTextWriteIndex = 0;
+
+                            if (int.TryParse(text, out int value))
+                            {
+                                pixels[pixelWriteIndex++] = value switch
+                                {
+                                    >= 0 and <= 255 => (byte)value,
+                                    _ => throw new NotSupportedException($"Value must be between 0 and 255 ({value})"),
+                                };
+                            }
+                            else
+                            {
+                                throw new NotSupportedException($"Must be numeric value. ({text})");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"Ignore text : {(char)b} (0x{b:X2})");
+                    }
+                }
+            }
+            return pixels;
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(pixelTextBuffer);
+            ArrayPool<byte>.Shared.Return(wordTextBuffer);
         }
     }
 

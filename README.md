@@ -4,7 +4,7 @@ Decode Portable PixMap (ppm) images in C#
 
 
 
-### Portable PixMap
+## Portable PixMap
 
 | Magic Number | Type | Extension | Image Type | Encoding |
 | ------------ | ---- | --------- | ---------- | -------- |
@@ -17,23 +17,23 @@ Decode Portable PixMap (ppm) images in C#
 
 
 
-### Not implemented
+## Usage
 
-#### P1
+```cs
+PpmImage image = await PpmImage.ReadAsync(@"C:\test.ppm");
+```
+
+
+
+## Not implemented
 
 #### P2
 
-1. 未実装
-2. 画素中のコメント
-3. MaxLevel 255超 (BigEndian)
+1. MaxLevel 255超 (BigEndian)
 
 #### P3
 
-1. 未実装
-2. 画素中のコメント
-3. MaxLevel 255超 (BigEndian)
-
-#### P4
+1. MaxLevel 255超 (BigEndian)
 
 #### P5
 
@@ -49,7 +49,7 @@ Decode Portable PixMap (ppm) images in C#
 
 
 
-### References
+## References
 
 [PPMフォーマット | Optical Learning Blog](http://optical-learning-blog.realop.co.jp/?eid=14)
 

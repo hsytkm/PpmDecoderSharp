@@ -8,16 +8,14 @@ public class ReadImageTest
     [InlineData(Consts.ImagePathP1_2, 24, 7, 1, "feep.pbm")]
     [InlineData(Consts.ImagePathP1_3, 25, 25, 1, "letter_a.pbma")]
     [InlineData(Consts.ImagePathP1_4, 136, 82, 1, null)]
-#if false
     // P2
     [InlineData(Consts.ImagePathP2_1, 24, 7, 15, "feep.ascii.pgm")]
-    [InlineData(Consts.ImagePathP2_2, 400, 200, 252, "test02.pgm")]
+    [InlineData(Consts.ImagePathP2_2, 300, 200, 252, "test02.pgm")]
     [InlineData(Consts.ImagePathP2_3, 600, 600, 255, null)]
     [InlineData(Consts.ImagePathP2_4, 300, 246, 255, "fred.pgm created by PGMA_IO::PGMA_WRITE.")]
     // P3
-    [InlineData(Consts.ImagePathP3_1, 300, 300, 244, "pbmlib.ppma created by PPMLIB(PPMA_WRITE).")]
+    [InlineData(Consts.ImagePathP3_1, 300, 300, 255, "pbmlib.ppma created by PPMLIB(PPMA_WRITE).")]
     [InlineData(Consts.ImagePathP3_2, 256, 256, 255, "snail.ppm")]
-#endif
     // P4
     [InlineData(Consts.ImagePathP4_1, 25, 25, 1, "letter_a.pbma")]
     [InlineData(Consts.ImagePathP4_2, 24, 7, 1, "feep.pbm")]
