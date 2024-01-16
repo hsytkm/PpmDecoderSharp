@@ -4,6 +4,9 @@ using System.Text.RegularExpressions;
 
 namespace PpmDecoderSharp;
 
+/// <summary>
+/// Image header information written in text.
+/// </summary>
 internal sealed partial record PpmHeader(
     PpmHeader.PixmapFormat Format,
     int Width,
@@ -34,10 +37,12 @@ internal sealed partial record PpmHeader(
     };
 
     public int BytesPerChannel => (MaxLevel / 256) + 1;
+
+    /// <summary>Depth</summary>
     public int BytesPerPixel => Channels * BytesPerChannel;
 
     /// <summary>Size of pixels only, excluding header</summary>
-    public int ImageSize => Width * Height * BytesPerPixel;
+    public int ImageSize => Height * Width * BytesPerPixel;
 
     private static PpmHeader? Create(PixmapFormat format, int width, int height, int maxLevel, int pixelOffset, string? comment)
     {

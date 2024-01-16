@@ -30,7 +30,7 @@
      1. [P3-255-comment-pbmlib.ascii.ppm](https://people.sc.fsu.edu/~jburkardt/data/ppma/pbmlib.ascii.ppm)
      
      2. [P3-255-comment-snail.ascii.ppm](https://people.sc.fsu.edu/~jburkardt/data/ppma/snail.ascii.ppm)
-
+   
 4. P4
 
    - [PBMB Files](https://people.sc.fsu.edu/~jburkardt/data/pbmb/pbmb.html)
@@ -40,6 +40,8 @@
      2. [P4-comment-feep.pbm](https://people.sc.fsu.edu/~jburkardt/data/pbmb/feep.pbm)
      
      3. [P4-scs.pbm](https://people.sc.fsu.edu/~jburkardt/data/pbmb/scs.pbm)
+     
+     4. [P4-washington.pbm](https://people.sc.fsu.edu/~jburkardt/data/pbmb/washington.pbm)
 
 5. P5
 

@@ -19,6 +19,7 @@ internal static class Consts
     internal const string ImagePathP4_1 = @"Assets\P4-comment_letter_a.pbm";
     internal const string ImagePathP4_2 = @"Assets\P4-comment-feep.pbm";
     internal const string ImagePathP4_3 = @"Assets\P4-scs.pbm";
+    internal const string ImagePathP4_4 = @"Assets\P4-washington.pbm";
 
     internal const string ImagePathP5_1 = @"Assets\P5-15-feep.pgm";
     internal const string ImagePathP5_2 = @"Assets\P5-255-baboon.pgm";

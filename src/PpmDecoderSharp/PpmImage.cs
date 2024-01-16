@@ -3,6 +3,9 @@ using System.Diagnostics;
 
 namespace PpmDecoderSharp;
 
+/// <summary>
+/// Ppm format image
+/// </summary>
 public sealed record PpmImage
 {
     private const int PixelTextBufferSize = 4096;
