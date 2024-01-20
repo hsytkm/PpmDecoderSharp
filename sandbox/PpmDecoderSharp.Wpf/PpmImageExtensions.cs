@@ -13,10 +13,10 @@ public static class PpmImageExtensions
     {
         var bitmap = (ppm.Channels, ppm.BytesPerChannel, ppm.MaxLevel) switch
         {
-            (1, 1, 255) => ToBitmapSource1ByteMax255(ppm, PixelFormats.Gray8),
-            (1, 1, < 255) => ToBitmapSource1ByteMaxUnder255(ppm, PixelFormats.Gray8),
-            (3, 1, 255) => ToBitmapSource1ByteMax255(ppm, PixelFormats.Rgb24),
-            (3, 1, < 255) => ToBitmapSource1ByteMaxUnder255(ppm, PixelFormats.Rgb24),
+            (1, 1, 0xff) => ToBitmapSource1ByteMax(ppm, PixelFormats.Gray8),
+            (1, 1, < 0xff) => ToBitmapSource1ByteUnderMax(ppm, PixelFormats.Gray8),
+            (3, 1, 0xff) => ToBitmapSource1ByteMax(ppm, PixelFormats.Rgb24),
+            (3, 1, < 0xff) => ToBitmapSource1ByteUnderMax(ppm, PixelFormats.Rgb24),
             _ => throw new NotImplementedException($"Ch={ppm.Channels}, Bytes/Ch={ppm.BytesPerChannel}, MaxLv={ppm.MaxLevel}")
         };
 
@@ -27,7 +27,7 @@ public static class PpmImageExtensions
     }
 
     // Byte=1/MaxLv=255
-    private static unsafe BitmapSource ToBitmapSource1ByteMax255(PpmImage ppm, in PixelFormat pixelFormat)
+    private static unsafe BitmapSource ToBitmapSource1ByteMax(PpmImage ppm, in PixelFormat pixelFormat)
     {
         ArgumentOutOfRangeException.ThrowIfNotEqual(ppm.MaxLevel, 255, nameof(ppm.MaxLevel));
 
@@ -41,11 +41,11 @@ public static class PpmImageExtensions
         }
     }
 
-    // Byte=1/MaxLv<255
-    private static unsafe BitmapSource ToBitmapSource1ByteMaxUnder255(PpmImage ppm, in PixelFormat pixelFormat)
+    // Byte=1/MaxLv=1~254
+    private static unsafe BitmapSource ToBitmapSource1ByteUnderMax(PpmImage ppm, in PixelFormat pixelFormat)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(ppm.MaxLevel, 1, nameof(ppm.MaxLevel));
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(ppm.MaxLevel, 255, nameof(ppm.MaxLevel));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(ppm.MaxLevel, 254, nameof(ppm.MaxLevel));
 
         float ratio = 255f / ppm.MaxLevel;
         int pixelSize = ppm.Stride * ppm.Height;
@@ -66,7 +66,9 @@ public static class PpmImageExtensions
                 // Memory is assumed to be contiguous.
                 byte* tailPtr = headPtr + pixelSize;
                 for (byte* p = headPtr; p < tailPtr; p++)
-                    *p = (byte)((*p * ratio) + 0.5f);   // round
+                {
+                    *p = (byte)Math.Min(byte.MaxValue, (*p * ratio) + 0.5f);    // round
+                }
             }
 
             return BitmapSource.Create(
@@ -78,5 +80,5 @@ public static class PpmImageExtensions
             ArrayPool<byte>.Shared.Return(pixels);
         }
     }
-    
+
 }

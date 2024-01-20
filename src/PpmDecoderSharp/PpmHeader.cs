@@ -36,7 +36,12 @@ internal sealed partial record PpmHeader(
         _ => throw new NotSupportedException($"Not supported format : {Format}")
     };
 
-    public int BytesPerChannel => (MaxLevel / 256) + 1;
+    public int BytesPerChannel => MaxLevel switch
+    {
+        <= 0x00ff => 1,
+        <= 0xffff => 2,
+        _ => throw new NotSupportedException($"MaxLevel is too large. ({MaxLevel})")
+    };
 
     /// <summary>Depth</summary>
     public int BytesPerPixel => Channels * BytesPerChannel;

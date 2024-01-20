@@ -106,20 +106,21 @@ public sealed record PpmImage
                     if (isInComment)
                         continue;
 
-                    switch (b)
+                    if (b is (byte)'0')
                     {
-                        case (byte)'0':
                             pixels[writeIndex++] = 0;
-                            break;
-                        case (byte)'1':
+                    }
+                    else if (b is (byte)'1')
+                    {
                             pixels[writeIndex++] = 1;
-                            break;
-                        case (byte)' ':
-                        case (byte)'\t':
-                            break;
-                        default:
+                    }
+                    else if (b is (byte)' ' or (byte)'\t' or (byte)'\r' or (byte)'\n')
+                    {
+                        // skip
+                    }
+                    else
+                    {
                             Debug.WriteLine($"Ignore text : {(char)b} (0x{b:X2})");
-                            break;
                     }
                 }
             }
@@ -251,14 +252,14 @@ public sealed record PpmImage
                         for (byte* p = srcRowHeadPtr; p < srcRowTailPtr; p++)
                         {
                             *((ulong*)dest) =
-                                  (((*p & 0x80) is 0) ? 0UL : 0x0100_0000_0000_0000)
-                                | (((*p & 0x40) is 0) ? 0UL : 0x0001_0000_0000_0000)
-                                | (((*p & 0x20) is 0) ? 0UL : 0x0000_0100_0000_0000)
-                                | (((*p & 0x10) is 0) ? 0UL : 0x0000_0001_0000_0000)
-                                | (((*p & 0x08) is 0) ? 0UL : 0x0000_0000_0100_0000)
-                                | (((*p & 0x04) is 0) ? 0UL : 0x0000_0000_0001_0000)
-                                | (((*p & 0x02) is 0) ? 0UL : 0x0000_0000_0000_0100)
-                                | (((*p & 0x01) is 0) ? 0UL : 0x0000_0000_0000_0001);
+                                  (((*p & 0x80) is 0) ? 0UL : 0x0000_0000_0000_0001)
+                                | (((*p & 0x40) is 0) ? 0UL : 0x0000_0000_0000_0100)
+                                | (((*p & 0x20) is 0) ? 0UL : 0x0000_0000_0001_0000)
+                                | (((*p & 0x10) is 0) ? 0UL : 0x0000_0000_0100_0000)
+                                | (((*p & 0x08) is 0) ? 0UL : 0x0000_0001_0000_0000)
+                                | (((*p & 0x04) is 0) ? 0UL : 0x0000_0100_0000_0000)
+                                | (((*p & 0x02) is 0) ? 0UL : 0x0001_0000_0000_0000)
+                                | (((*p & 0x01) is 0) ? 0UL : 0x0100_0000_0000_0000);
 
                             dest += sizeof(ulong);
                         }

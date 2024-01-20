@@ -29,19 +29,19 @@ PpmImage image = await PpmImage.ReadAsync(@"C:\test.ppm");
 
 #### P2
 
-1. MaxLevel 255超 (BigEndian)
+1. MaxLevel 16bit (256~65534, 65535)
 
 #### P3
 
-1. MaxLevel 255超 (BigEndian)
+1. MaxLevel 16bit (256~65534, 65535)
 
 #### P5
 
-1. MaxLevel 255超 (BigEndian)
+1. MaxLevel 16bit (256~65534, 65535)
 
 #### P6
 
-1. MaxLevel 255超 (BigEndian)
+1. MaxLevel 16bit (256~65534, 65535)
 
 #### Common
 
