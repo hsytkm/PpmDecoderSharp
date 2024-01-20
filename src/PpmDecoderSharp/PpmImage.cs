@@ -250,14 +250,17 @@ public sealed record PpmImage
 
                         for (byte* p = srcRowHeadPtr; p < srcRowTailPtr; p++)
                         {
-                            *(dest++) = ((*p & 0x80) is 0) ? (byte)0 : (byte)1;
-                            *(dest++) = ((*p & 0x40) is 0) ? (byte)0 : (byte)1;
-                            *(dest++) = ((*p & 0x20) is 0) ? (byte)0 : (byte)1;
-                            *(dest++) = ((*p & 0x10) is 0) ? (byte)0 : (byte)1;
-                            *(dest++) = ((*p & 0x08) is 0) ? (byte)0 : (byte)1;
-                            *(dest++) = ((*p & 0x04) is 0) ? (byte)0 : (byte)1;
-                            *(dest++) = ((*p & 0x02) is 0) ? (byte)0 : (byte)1;
-                            *(dest++) = ((*p & 0x01) is 0) ? (byte)0 : (byte)1;
+                            *((ulong*)dest) =
+                                  (((*p & 0x80) is 0) ? 0UL : 0x0100_0000_0000_0000)
+                                | (((*p & 0x40) is 0) ? 0UL : 0x0001_0000_0000_0000)
+                                | (((*p & 0x20) is 0) ? 0UL : 0x0000_0100_0000_0000)
+                                | (((*p & 0x10) is 0) ? 0UL : 0x0000_0001_0000_0000)
+                                | (((*p & 0x08) is 0) ? 0UL : 0x0000_0000_0100_0000)
+                                | (((*p & 0x04) is 0) ? 0UL : 0x0000_0000_0001_0000)
+                                | (((*p & 0x02) is 0) ? 0UL : 0x0000_0000_0000_0100)
+                                | (((*p & 0x01) is 0) ? 0UL : 0x0000_0000_0000_0001);
+
+                            dest += sizeof(ulong);
                         }
 
                         if (remainder > 0)
