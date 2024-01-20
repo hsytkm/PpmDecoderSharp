@@ -17,6 +17,10 @@ public static class PpmImageExtensions
             (1, 1, < 0xff) => ToBitmapSource1ByteUnderMax(ppm, PixelFormats.Gray8),
             (3, 1, 0xff) => ToBitmapSource1ByteMax(ppm, PixelFormats.Rgb24),
             (3, 1, < 0xff) => ToBitmapSource1ByteUnderMax(ppm, PixelFormats.Rgb24),
+            (1, 2, 0xffff) => ToBitmapSource2ByteMax(ppm, PixelFormats.Gray8),
+            //(1, 2, < 0xffff) => ToBitmapSource2ByteUnderMax(ppm, PixelFormats.Gray8),
+            (3, 2, 0xffff) => ToBitmapSource2ByteMax(ppm, PixelFormats.Rgb24),
+            //(3, 2, < 0xffff) => ToBitmapSource2ByteUnderMax(ppm, PixelFormats.Rgb24),
             _ => throw new NotImplementedException($"Ch={ppm.Channels}, Bytes/Ch={ppm.BytesPerChannel}, MaxLv={ppm.MaxLevel}")
         };
 
@@ -81,4 +85,42 @@ public static class PpmImageExtensions
         }
     }
 
+    // Byte=2/MaxLv=65535(BigEndian)
+    private static unsafe BitmapSource ToBitmapSource2ByteMax(PpmImage ppm, in PixelFormat pixelFormat)
+    {
+        ArgumentOutOfRangeException.ThrowIfNotEqual(ppm.MaxLevel, 65535, nameof(ppm.MaxLevel));
+
+        int destBytesPerPixel = ppm.Channels;   // dest=8bit
+        int destStride = ppm.Width * destBytesPerPixel;
+        int destPixelSize = ppm.Height * destStride;
+        byte[] destPixels = ArrayPool<byte>.Shared.Rent(destPixelSize);
+
+        try
+        {
+            ref readonly byte srcBytes = ref MemoryMarshal.AsRef<byte>(ppm.AsSpan());
+
+            fixed (byte* fixedSrcPtr = &srcBytes)
+            fixed (byte* fixedDestPtr = destPixels)
+            {
+                ushort* srcHeadPtr = (ushort*)fixedSrcPtr;
+                ushort* srcTailPtr = (ushort*)(fixedSrcPtr + (ppm.Height * ppm.Stride));
+                byte* destPtr = fixedDestPtr;
+
+                // Memory is assumed to be contiguous.
+                for (ushort* srcPtr = srcHeadPtr; srcPtr < srcTailPtr; srcPtr++)
+                {
+                    //ushort value = (ushort)(((*srcPtr & 0xff) << 8) | (*srcPtr >> 8));
+                    *(destPtr++) = (byte)(*srcPtr & 0x00ff);    // Upper bit
+                }
+            }
+
+            return BitmapSource.Create(
+                ppm.Width, ppm.Height, Dpi, Dpi, pixelFormat, null,
+                destPixels, destStride);
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(destPixels);
+        }
+    }
 }

@@ -118,7 +118,10 @@ internal sealed partial record PpmHeader(
         if (!int.TryParse(lastGroup.Value, out int height))
             return null;
 
-        int offset = lastGroup.Index + lastGroup.Length + 1;
+        int offset = GetPixelOffset(headerText, lastGroup.Index + lastGroup.Length);
+        if (offset < 0)
+            return null;
+
         return Create(format, width, height, 1, offset, comment);
     }
 
@@ -143,7 +146,10 @@ internal sealed partial record PpmHeader(
         if (!int.TryParse(lastGroup.Value, out int maxLevel))
             return null;
 
-        int offset = lastGroup.Index + lastGroup.Length + 1;
+        int offset = GetPixelOffset(headerText, lastGroup.Index + lastGroup.Length);
+        if (offset < 0)
+            return null;
+
         return Create(format, width, height, maxLevel, offset, comment);
     }
 
@@ -157,6 +163,25 @@ internal sealed partial record PpmHeader(
             return comment[2..];
 
         return comment;
+    }
+
+    private static int GetPixelOffset(string headerText, int startOffset)
+    {
+        // ToDo: 正規表現を改善すれば本関数を削除できると思っています
+        var span = headerText.AsSpan();
+        if (span.Length <= startOffset)
+        {
+            //throw new NotSupportedException($"StartOffset is invalid. ({startOffset})");
+            return -1;
+        }
+
+        // ToDo: 未確認ですが、セパレータが \r\n の場合に、最終のセパレータを \r と判別して先頭画素を \n(0x0a) と処理してしまう気がします。
+        for (int i = startOffset; i < span.Length; i++)
+        {
+            if (span[i] is not ('\r' or '\n' or ' ' or '\t'))
+                return i;
+        }
+        return span.Length;
     }
 
     [GeneratedRegex(@"^P(?<no>[14])(?<comment>\s*# .*)?\s+(?<width>\d+)\s+(?<height>\d+).*")]

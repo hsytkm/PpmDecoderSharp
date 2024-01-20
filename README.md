@@ -41,7 +41,7 @@ PpmImage image = await PpmImage.ReadAsync(@"C:\test.ppm");
 
 #### P6
 
-1. MaxLevel 16bit (256~65534, 65535)
+1. MaxLevel 16bit (256~65534)
 
 #### Common
 

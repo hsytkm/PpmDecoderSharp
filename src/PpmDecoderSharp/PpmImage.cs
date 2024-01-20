@@ -108,11 +108,11 @@ public sealed record PpmImage
 
                     if (b is (byte)'0')
                     {
-                            pixels[writeIndex++] = 0;
+                        pixels[writeIndex++] = 0;
                     }
                     else if (b is (byte)'1')
                     {
-                            pixels[writeIndex++] = 1;
+                        pixels[writeIndex++] = 1;
                     }
                     else if (b is (byte)' ' or (byte)'\t' or (byte)'\r' or (byte)'\n')
                     {
@@ -120,7 +120,7 @@ public sealed record PpmImage
                     }
                     else
                     {
-                            Debug.WriteLine($"Ignore text : {(char)b} (0x{b:X2})");
+                        Debug.WriteLine($"Ignore text : {(char)b} (0x{b:X2})");
                     }
                 }
             }
@@ -290,9 +290,6 @@ public sealed record PpmImage
     {
         if (header.Format is not (PpmHeader.PixmapFormat.P5 or PpmHeader.PixmapFormat.P6))
             throw new NotSupportedException($"Not supported format : {header.Format}");
-
-        if (header.MaxLevel > 255)
-            throw new NotSupportedException($"Not supported max level : {header.MaxLevel}");
 
         int pixelSize = header.ImageSize;
         var pixels = new byte[pixelSize];
