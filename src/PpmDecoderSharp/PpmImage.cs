@@ -73,11 +73,11 @@ public sealed record PpmImage
         if (header.MaxLevel != 1)
             throw new NotSupportedException($"Not supported max level : {header.MaxLevel}");
 
-        int pixelSize = header.ImageSize;
         byte[] pixelTextBuffer = ArrayPool<byte>.Shared.Rent(PixelTextBufferSize);
-        var pixels = new byte[pixelSize];
         try
         {
+            var pixels = new byte[header.ImageSize];
+
             int writeIndex = 0;
             bool needCommentCheck = true, isInComment = false;
 
@@ -141,14 +141,14 @@ public sealed record PpmImage
         if (header.MaxLevel > 255)
             throw new NotSupportedException($"Not supported max level : {header.MaxLevel}");
 
-        int pixelSize = header.ImageSize;
         byte[] pixelTextBuffer = ArrayPool<byte>.Shared.Rent(PixelTextBufferSize);
-        byte[] wordTextBuffer = ArrayPool<byte>.Shared.Rent(16);   // Even 2 Bytes depth can fit in 5 Bytes.
-        var pixels = new byte[pixelSize];
         try
         {
-            int pixelWriteIndex = 0, wordTextWriteIndex = 0;
+            var pixels = new byte[header.ImageSize];
+
+            int pixelWriteIndex = 0;
             bool needCommentCheck = true, isInComment = false;
+            int tempValue = -1;     // invalid
 
             int readCount;
             stream.Position = header.PixelOffset;
@@ -175,29 +175,30 @@ public sealed record PpmImage
                     if (isInComment)
                         continue;
 
-                    if ((byte)'0' <= b && b <= (byte)'9')
+                    if (b is >= (byte)'0' and <= (byte)'9')
                     {
-                        wordTextBuffer[wordTextWriteIndex++] = b;
+                        if (tempValue < 0)
+                        {
+                            tempValue = b - '0';
+                        }
+                        else
+                        {
+                            tempValue = (tempValue * 10) + (b - '0');
+                        }
                     }
                     else if (b is (byte)' ' or (byte)'\t' or (byte)'\r' or (byte)'\n')
                     {
-                        if (wordTextWriteIndex > 0)
+                        if (tempValue >= 0)
                         {
-                            var text = System.Text.Encoding.ASCII.GetString(wordTextBuffer.AsSpan()[0..wordTextWriteIndex]);
-                            wordTextWriteIndex = 0;
-
-                            if (int.TryParse(text, out int value))
+                            if (tempValue <= 0xff)
                             {
-                                pixels[pixelWriteIndex++] = value switch
-                                {
-                                    >= 0 and <= 255 => (byte)value,
-                                    _ => throw new NotSupportedException($"Value must be between 0 and 255 ({value})"),
-                                };
+                                pixels[pixelWriteIndex++] = (byte)tempValue;
                             }
                             else
                             {
-                                throw new NotSupportedException($"Must be numeric value. ({text})");
+                                throw new NotSupportedException($"Read value is big. ({tempValue}");
                             }
+                            tempValue = -1;     // invalid
                         }
                     }
                     else
@@ -211,7 +212,6 @@ public sealed record PpmImage
         finally
         {
             ArrayPool<byte>.Shared.Return(pixelTextBuffer);
-            ArrayPool<byte>.Shared.Return(wordTextBuffer);
         }
     }
 
@@ -233,7 +233,7 @@ public sealed record PpmImage
             stream.Position = header.PixelOffset;
             int readSize = await stream.ReadAsync(buffer.AsMemory(0, srcSize), cancellationToken);
             if (readSize != srcSize)
-                throw new NotImplementedException($"Unable to load the intended size. Expected={srcSize}, Actual={readSize}");
+                throw new NotImplementedException($"Unable to read the intended size. Expected={srcSize}, Actual={readSize}");
 
             var pixels = new byte[header.ImageSize];
             unsafe
@@ -241,15 +241,14 @@ public sealed record PpmImage
                 fixed (byte* destHeadPtr = pixels)
                 fixed (byte* srcHeadPtr = buffer)
                 {
+                    byte* srcTailPtr = srcHeadPtr + (srcStride * imageHeight);
                     byte* dest = destHeadPtr;
-                    byte* srcRowHeadPtr = srcHeadPtr;
                     (int srcWidthMax, int remainder) = Math.DivRem(imageWidth, 8);
 
-                    for (int y = 0; y < imageHeight; y++)
+                    for (byte* srcRowPtr = srcHeadPtr; srcRowPtr < srcTailPtr; srcRowPtr += srcStride)
                     {
-                        byte* srcRowTailPtr = srcRowHeadPtr + srcWidthMax;
-
-                        for (byte* p = srcRowHeadPtr; p < srcRowTailPtr; p++)
+                        byte* srcRowTailPtr = srcRowPtr + srcWidthMax;
+                        for (byte* p = srcRowPtr; p < srcRowTailPtr; p++)
                         {
                             *((ulong*)dest) =
                                   (((*p & 0x80) is 0) ? 0UL : 0x0000_0000_0000_0001)
@@ -272,8 +271,6 @@ public sealed record PpmImage
                             for (int mask = start; mask > end; mask >>= 1)
                                 *(dest++) = ((*srcRowTailPtr & mask) is 0) ? (byte)0 : (byte)1;
                         }
-
-                        srcRowHeadPtr += srcStride;
                     }
                 }
             }
@@ -291,13 +288,12 @@ public sealed record PpmImage
         if (header.Format is not (PpmHeader.PixmapFormat.P5 or PpmHeader.PixmapFormat.P6))
             throw new NotSupportedException($"Not supported format : {header.Format}");
 
-        int pixelSize = header.ImageSize;
-        var pixels = new byte[pixelSize];
+        var pixels = new byte[header.ImageSize];
 
         stream.Position = header.PixelOffset;
         int readSize = await stream.ReadAsync(pixels, cancellationToken);
-        if (readSize != pixelSize)
-            throw new NotImplementedException($"Unable to load the intended size. Expected={pixelSize}, Actual={readSize}");
+        if (readSize != pixels.Length)
+            throw new NotImplementedException($"Unable to read the intended size. Expected={pixels.Length}, Actual={readSize}");
 
         return pixels;
     }
