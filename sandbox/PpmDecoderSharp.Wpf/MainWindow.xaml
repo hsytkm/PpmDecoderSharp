@@ -33,7 +33,10 @@
         </StackPanel>
 
         <Border Background="AliceBlue">
-            <Image Source="{Binding ImageSource, Mode=OneWay}" Stretch="Uniform" />
+            <Image
+                Margin="3"
+                Source="{Binding ImageSource, Mode=OneWay}"
+                Stretch="Uniform" />
         </Border>
     </DockPanel>
 </Window>

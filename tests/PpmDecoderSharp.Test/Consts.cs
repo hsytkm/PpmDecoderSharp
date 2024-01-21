@@ -12,9 +12,13 @@ internal static class Consts
     internal const string ImagePathP2_2 = @"Assets\P2-252-comment-tracks.ascii.pgm";
     internal const string ImagePathP2_3 = @"Assets\P2-255-apollonian_gasket.ascii.pgm";
     internal const string ImagePathP2_4 = @"Assets\P2-255-comment-coins.ascii.pgm";
+    internal const string ImagePathP2_5 = @"Assets\P2-65535-chart.pgm";
 
     internal const string ImagePathP3_1 = @"Assets\P3-255-comment-pbmlib.ascii.ppm";
     internal const string ImagePathP3_2 = @"Assets\P3-255-comment-snail.ascii.ppm";
+    internal const string ImagePathP3_3 = @"Assets\P3-65535-chart_gray.ppm";
+    internal const string ImagePathP3_4 = @"Assets\P3-65535-chart_green_blue.ppm";
+    internal const string ImagePathP3_5 = @"Assets\P3-65535-chart_red.ppm";
 
     internal const string ImagePathP4_1 = @"Assets\P4-comment_letter_a.pbm";
     internal const string ImagePathP4_2 = @"Assets\P4-comment-feep.pbm";

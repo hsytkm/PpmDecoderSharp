@@ -13,12 +13,15 @@ public static class PpmImageExtensions
     {
         var bitmap = (ppm.Channels, ppm.BytesPerChannel, ppm.MaxLevel) switch
         {
+            // P1/P2/P4/P5
             (1, 1, 0xff) => ToBitmapSource1ByteMax(ppm, PixelFormats.Gray8),
             (1, 1, < 0xff) => ToBitmapSource1ByteUnderMax(ppm, PixelFormats.Gray8),
-            (3, 1, 0xff) => ToBitmapSource1ByteMax(ppm, PixelFormats.Rgb24),
-            (3, 1, < 0xff) => ToBitmapSource1ByteUnderMax(ppm, PixelFormats.Rgb24),
             (1, 2, 0xffff) => ToBitmapSource2ByteMax(ppm, PixelFormats.Gray8),
             //(1, 2, < 0xffff) => ToBitmapSource2ByteUnderMax(ppm, PixelFormats.Gray8),
+
+            // P3/P6
+            (3, 1, 0xff) => ToBitmapSource1ByteMax(ppm, PixelFormats.Rgb24),
+            (3, 1, < 0xff) => ToBitmapSource1ByteUnderMax(ppm, PixelFormats.Rgb24),
             (3, 2, 0xffff) => ToBitmapSource2ByteMax(ppm, PixelFormats.Rgb24),
             //(3, 2, < 0xffff) => ToBitmapSource2ByteUnderMax(ppm, PixelFormats.Rgb24),
             _ => throw new NotImplementedException($"Ch={ppm.Channels}, Bytes/Ch={ppm.BytesPerChannel}, MaxLv={ppm.MaxLevel}")

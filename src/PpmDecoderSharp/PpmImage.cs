@@ -138,9 +138,6 @@ public sealed record PpmImage
         if (header.Format is not (PpmHeader.PixmapFormat.P2 or PpmHeader.PixmapFormat.P3))
             throw new NotSupportedException($"Not supported format : {header.Format}");
 
-        if (header.MaxLevel > 255)
-            throw new NotSupportedException($"Not supported max level : {header.MaxLevel}");
-
         byte[] pixelTextBuffer = ArrayPool<byte>.Shared.Rent(PixelTextBufferSize);
         try
         {
@@ -190,9 +187,14 @@ public sealed record PpmImage
                     {
                         if (tempValue >= 0)
                         {
-                            if (tempValue <= 0xff)
+                            if (header.BytesPerChannel == 1)
                             {
                                 pixels[pixelWriteIndex++] = (byte)tempValue;
+                            }
+                            else if (header.BytesPerChannel == 2)
+                            {
+                                pixels[pixelWriteIndex++] = (byte)(tempValue >> 8);
+                                pixels[pixelWriteIndex++] = (byte)(tempValue & 0x00ff);
                             }
                             else
                             {
