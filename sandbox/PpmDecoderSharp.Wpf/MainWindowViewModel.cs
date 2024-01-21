@@ -38,5 +38,5 @@ public partial class MainWindowViewModel : ObservableObject
 
 public sealed record PpmProperty(int FormatNumber, int Width, int Height, int MaxLevel, string? Comment)
 {
-    public PpmProperty(PpmImage ppm) : this(ppm.FormatNumber, ppm.Width, ppm.Height, ppm.MaxLevel, ppm.Comment) { }
+    public PpmProperty(IPpmImage ppm) : this(ppm.FormatNumber, ppm.Width, ppm.Height, ppm.MaxLevel, ppm.Comment) { }
 }

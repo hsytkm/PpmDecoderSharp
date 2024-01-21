@@ -9,7 +9,7 @@ public static class PpmImageExtensions
 {
     private const double Dpi = 96.0;
 
-    public static BitmapSource ToBitmapSource(this PpmImage ppm, bool isFreeze = true)
+    public static BitmapSource ToBitmapSource(this IPpmImage ppm, bool isFreeze = true)
     {
         var bitmap = (ppm.Channels, ppm.BytesPerChannel, ppm.MaxLevel) switch
         {
@@ -34,7 +34,7 @@ public static class PpmImageExtensions
     }
 
     // Byte=1/MaxLv=255
-    private static unsafe BitmapSource ToBitmapSource1ByteMax(PpmImage ppm, in PixelFormat pixelFormat)
+    private static unsafe BitmapSource ToBitmapSource1ByteMax(IPpmImage ppm, in PixelFormat pixelFormat)
     {
         ArgumentOutOfRangeException.ThrowIfNotEqual(ppm.MaxLevel, 255, nameof(ppm.MaxLevel));
 
@@ -49,7 +49,7 @@ public static class PpmImageExtensions
     }
 
     // Byte=1/MaxLv=1~254
-    private static unsafe BitmapSource ToBitmapSource1ByteUnderMax(PpmImage ppm, in PixelFormat pixelFormat)
+    private static unsafe BitmapSource ToBitmapSource1ByteUnderMax(IPpmImage ppm, in PixelFormat pixelFormat)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(ppm.MaxLevel, 1, nameof(ppm.MaxLevel));
         ArgumentOutOfRangeException.ThrowIfGreaterThan(ppm.MaxLevel, 254, nameof(ppm.MaxLevel));
@@ -89,7 +89,7 @@ public static class PpmImageExtensions
     }
 
     // Byte=2/MaxLv=65535(BigEndian)
-    private static unsafe BitmapSource ToBitmapSource2ByteMax(PpmImage ppm, in PixelFormat pixelFormat)
+    private static unsafe BitmapSource ToBitmapSource2ByteMax(IPpmImage ppm, in PixelFormat pixelFormat)
     {
         ArgumentOutOfRangeException.ThrowIfNotEqual(ppm.MaxLevel, 65535, nameof(ppm.MaxLevel));
 

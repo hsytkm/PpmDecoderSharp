@@ -6,7 +6,7 @@ namespace PpmDecoderSharp;
 /// <summary>
 /// Ppm format image
 /// </summary>
-public sealed record PpmImage
+public sealed record PpmImage : IPpmImage, IPpmReader
 {
     private const int PixelTextBufferSize = 4096;
 
@@ -16,19 +16,21 @@ public sealed record PpmImage
     public int FormatNumber => (int)_header.Format;
     public int Width => _header.Width;
     public int Height => _header.Height;
+    public int MaxLevel => _header.MaxLevel;
     public int Channels => _header.Channels;
     public int BytesPerChannel => _header.BytesPerChannel;
     public int BytesPerPixel => _header.BytesPerPixel;
     public int Stride => _header.Width * _header.BytesPerPixel;
-    public int MaxLevel => _header.MaxLevel;
     public string? Comment => _header.Comment;
 
     public ReadOnlySpan<byte> AsSpan() => _pixels.AsSpan();
 
     private PpmImage(PpmHeader header, byte[] pixels) => (_header, _pixels) = (header, pixels);
 
-    public static async Task<PpmImage?> ReadAsync(string? filePath, CancellationToken cancellationToken = default)
+    public static async Task<IPpmImage?> ReadAsync(string? filePath, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
+
         if (!File.Exists(filePath))
             return null;
 
@@ -44,8 +46,10 @@ public sealed record PpmImage
         }
     }
 
-    public static async Task<PpmImage?> ReadAsync(Stream stream, CancellationToken cancellationToken = default)
+    public static async Task<IPpmImage?> ReadAsync(Stream? stream, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(stream, nameof(stream));
+
         var header = await PpmHeader.CreateAsync(stream, cancellationToken);
         if (header is null)
             return null;
@@ -58,7 +62,7 @@ public sealed record PpmImage
             PpmHeader.PixmapFormat.P4 => ReadBinaryPixelsAsync(stream, header, cancellationToken),
             PpmHeader.PixmapFormat.P5 or
             PpmHeader.PixmapFormat.P6 => ReadValuePixelsAsync(stream, header, cancellationToken),
-            _ => throw new NotSupportedException($"Unsupported Format : {header.Format}")
+            _ => throw new NotSupportedException($"Unsupported format : {header.Format}")
         });
 
         return new PpmImage(header, pixels);
