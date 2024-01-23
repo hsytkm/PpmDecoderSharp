@@ -16,6 +16,9 @@ public interface IPpmImage
     string? Comment { get; }
 
     ReadOnlySpan<byte> AsSpan();
+
+    void SaveToBmp(string? filePath);
+    Task SaveToBmpAsync(string? filePath, CancellationToken cancellationToken = default);
 }
 
 internal interface IPpmReader

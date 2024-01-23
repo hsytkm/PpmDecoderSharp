@@ -18,11 +18,22 @@
     <DockPanel>
         <TextBox DockPanel.Dock="Top" Text="{Binding ImageFilePath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-        <Button
-            Padding="5"
-            Command="{Binding ReadImageCommand, Mode=OneTime}"
-            Content="Load ppm image"
-            DockPanel.Dock="Top" />
+        <Grid DockPanel.Dock="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+            <Button
+                Grid.Column="0"
+                Padding="5"
+                Command="{Binding ReadImageCommand, Mode=OneTime}"
+                Content="Load ppm image" />
+            <Button
+                Grid.Column="1"
+                Padding="5"
+                Command="{Binding SaveImageCommand, Mode=OneTime}"
+                Content="Save" />
+        </Grid>
 
         <StackPanel Width="100" DockPanel.Dock="Left">
             <TextBlock Text="{Binding PpmProp.FormatNumber, Mode=OneWay, StringFormat='Format : P{0}'}" />

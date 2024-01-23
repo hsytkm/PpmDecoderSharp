@@ -23,9 +23,30 @@ public sealed record PpmImage : IPpmImage, IPpmReader
     public int Stride => _header.Width * _header.BytesPerPixel;
     public string? Comment => _header.Comment;
 
+    /// <summary>Color images are in RGB array.</summary>
     public ReadOnlySpan<byte> AsSpan() => _pixels.AsSpan();
 
     private PpmImage(PpmHeader header, byte[] pixels) => (_header, _pixels) = (header, pixels);
+
+    public void SaveToBmp(string? filePath)
+    {
+        ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
+
+        if (File.Exists(filePath))
+            throw new IOException(nameof(filePath));
+
+        PpmSaver.SaveToBmp(this, filePath);
+    }
+
+    public async Task SaveToBmpAsync(string? filePath, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
+
+        if (File.Exists(filePath))
+            throw new IOException(nameof(filePath));
+
+        await PpmSaver.SaveToBmpAsync(this, filePath, cancellationToken);
+    }
 
     public static async Task<IPpmImage?> ReadAsync(string? filePath, CancellationToken cancellationToken = default)
     {

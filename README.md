@@ -46,6 +46,8 @@ IPpmImage image = await PpmImage.ReadAsync(@"C:\test.ppm");
 #### Common
 
 1. BitShift
+2. Save Gray 16bit image
+3. Save Color 16bit image
 
 
 
@@ -81,3 +83,4 @@ IPpmImage image = await PpmImage.ReadAsync(@"C:\test.ppm");
 
 [Netpbm - Wikipedia](https://en.wikipedia.org/wiki/Netpbm)
 
+[Create 16bit pgm/ppm images - GitHub/hsytkm](https://gist.github.com/hsytkm/3a57b2731a06cede117b768f5bd21f3d)
