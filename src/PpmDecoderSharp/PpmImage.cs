@@ -13,21 +13,39 @@ public sealed record PpmImage : IPpmImage, IPpmReader
     private readonly PpmHeader _header;
     private readonly byte[] _pixels;
 
+    /// <inheritdoc/>
     public int FormatNumber => (int)_header.Format;
-    public int Width => _header.Width;
-    public int Height => _header.Height;
-    public int MaxLevel => _header.MaxLevel;
-    public int Channels => _header.Channels;
-    public int BytesPerChannel => _header.BytesPerChannel;
-    public int BytesPerPixel => _header.BytesPerPixel;
-    public int Stride => _header.Width * _header.BytesPerPixel;
-    public string? Comment => _header.Comment;
 
-    /// <summary>Color images are in RGB array.</summary>
-    public ReadOnlySpan<byte> AsSpan() => _pixels.AsSpan();
+    /// <inheritdoc/>
+    public int Width => _header.Width;
+
+    /// <inheritdoc/>
+    public int Height => _header.Height;
+
+    /// <inheritdoc/>
+    public int MaxLevel => _header.MaxLevel;
+
+    /// <inheritdoc/>
+    public int Channels => _header.Channels;
+
+    /// <inheritdoc/>
+    public int BytesPerChannel => _header.BytesPerChannel;
+
+    /// <inheritdoc/>
+    public int BytesPerPixel => _header.BytesPerPixel;
+
+    /// <inheritdoc/>
+    public int Stride => _header.Width * _header.BytesPerPixel;
+
+    /// <inheritdoc/>
+    public string? Comment => _header.Comment;
 
     private PpmImage(PpmHeader header, byte[] pixels) => (_header, _pixels) = (header, pixels);
 
+    /// <inheritdoc/>
+    public ReadOnlySpan<byte> GetRawPixels() => _pixels.AsSpan();
+
+    /// <inheritdoc/>
     public void SaveToBmp(string? filePath)
     {
         ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
@@ -38,6 +56,7 @@ public sealed record PpmImage : IPpmImage, IPpmReader
         PpmSaver.SaveToBmp(this, filePath);
     }
 
+    /// <inheritdoc/>
     public async Task SaveToBmpAsync(string? filePath, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
@@ -48,6 +67,7 @@ public sealed record PpmImage : IPpmImage, IPpmReader
         await PpmSaver.SaveToBmpAsync(this, filePath, cancellationToken);
     }
 
+    /// <inheritdoc/>
     public static async Task<IPpmImage?> ReadAsync(string? filePath, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
@@ -67,6 +87,7 @@ public sealed record PpmImage : IPpmImage, IPpmReader
         }
     }
 
+    /// <inheritdoc/>
     public static async Task<IPpmImage?> ReadAsync(Stream? stream, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(stream, nameof(stream));

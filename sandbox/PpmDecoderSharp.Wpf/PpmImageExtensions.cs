@@ -38,7 +38,7 @@ public static class PpmImageExtensions
     {
         ArgumentOutOfRangeException.ThrowIfNotEqual(ppm.MaxLevel, 255, nameof(ppm.MaxLevel));
 
-        ref readonly byte refBytes = ref MemoryMarshal.AsRef<byte>(ppm.AsSpan());
+        ref readonly byte refBytes = ref MemoryMarshal.AsRef<byte>(ppm.GetRawPixels());
 
         fixed (byte* srcPtr = &refBytes)
         {
@@ -60,7 +60,7 @@ public static class PpmImageExtensions
 
         try
         {
-            ref readonly byte refBytes = ref MemoryMarshal.AsRef<byte>(ppm.AsSpan());
+            ref readonly byte refBytes = ref MemoryMarshal.AsRef<byte>(ppm.GetRawPixels());
 
             fixed (byte* srcPtr = &refBytes)
             {
@@ -100,7 +100,7 @@ public static class PpmImageExtensions
 
         try
         {
-            ref readonly byte srcBytes = ref MemoryMarshal.AsRef<byte>(ppm.AsSpan());
+            ref readonly byte srcBytes = ref MemoryMarshal.AsRef<byte>(ppm.GetRawPixels());
 
             fixed (byte* fixedSrcPtr = &srcBytes)
             fixed (byte* fixedDestPtr = destPixels)

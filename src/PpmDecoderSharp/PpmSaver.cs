@@ -42,7 +42,7 @@ internal static class PpmSaver
         var destStride = bitmap.Stride;
         Debug.Assert(srcStride <= destStride);
 
-        ref readonly byte srcRefBytes = ref MemoryMarshal.AsRef<byte>(ppm.AsSpan());
+        ref readonly byte srcRefBytes = ref MemoryMarshal.AsRef<byte>(ppm.GetRawPixels());
         ref readonly byte destRefBytes = ref MemoryMarshal.AsRef<byte>(bitmap.GetPixelsSpan());
 
         fixed (byte* srcHead = &srcRefBytes)
@@ -70,7 +70,7 @@ internal static class PpmSaver
         var destStride = bitmap.Stride;
         Debug.Assert(srcStride <= destStride);
 
-        ref readonly byte srcRefBytes = ref MemoryMarshal.AsRef<byte>(ppm.AsSpan());
+        ref readonly byte srcRefBytes = ref MemoryMarshal.AsRef<byte>(ppm.GetRawPixels());
         ref readonly byte destRefBytes = ref MemoryMarshal.AsRef<byte>(bitmap.GetPixelsSpan());
 
         fixed (byte* srcHead = &srcRefBytes)

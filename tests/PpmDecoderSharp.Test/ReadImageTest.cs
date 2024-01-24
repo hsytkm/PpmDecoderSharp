@@ -53,7 +53,7 @@ public class ReadImageTest
         ppm.Comment.Should().Be(comment);
 
         var actualHash = new byte[32];    // 256bit=32Byte
-        System.Security.Cryptography.SHA256.TryHashData(ppm.AsSpan(), actualHash, out int bytesWritten).Should().BeTrue();
+        System.Security.Cryptography.SHA256.TryHashData(ppm.GetRawPixels(), actualHash, out int bytesWritten).Should().BeTrue();
 
         var actualHashString = BitConverter.ToString(actualHash.AsSpan()[..bytesWritten].ToArray()).Replace("-", "");
         actualHashString.Should().Be(expectedHashString);
