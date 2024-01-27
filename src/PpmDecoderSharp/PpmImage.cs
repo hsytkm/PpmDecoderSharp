@@ -53,7 +53,7 @@ public sealed record PpmImage : IPpmImage, IPpmReader
         if (File.Exists(filePath))
             throw new IOException(nameof(filePath));
 
-        PpmSaver.SaveToBmp(this, filePath);
+        PpmFileSaver.SaveToBmp(this, filePath);
     }
 
     /// <inheritdoc/>
@@ -64,7 +64,7 @@ public sealed record PpmImage : IPpmImage, IPpmReader
         if (File.Exists(filePath))
             throw new IOException(nameof(filePath));
 
-        await PpmSaver.SaveToBmpAsync(this, filePath, cancellationToken);
+        await PpmFileSaver.SaveToBmpAsync(this, filePath, cancellationToken);
     }
 
     /// <inheritdoc/>

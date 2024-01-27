@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace PpmDecoderSharp;
 
@@ -6,19 +7,19 @@ namespace PpmDecoderSharp;
 
 internal sealed class BitmapImage
 {
-    private readonly byte[] _bs;
+    private readonly byte[] _pixels;
 
     public int Width { get; }
     public int Height { get; }
-    public int Stride { get; }
     public int BytesPerPixel { get; }
+    public int Stride { get; }
+
     public int PixelOffsetBytes { get; }
+    public Span<byte> GetPixelsSpan() => _pixels.AsSpan()[PixelOffsetBytes..];
 
-    public Span<byte> GetPixelsSpan() => _bs.AsSpan()[PixelOffsetBytes..];
-
-    private BitmapImage(byte[] bs, in BitmapHeader header)
+    private BitmapImage(byte[] pixels, in BitmapHeader header)
     {
-        _bs = bs;
+        _pixels = pixels;
         Width = header.Width;
         Height = header.Height;
         BytesPerPixel = header.BytesPerPixel;
@@ -26,34 +27,97 @@ internal sealed class BitmapImage
         PixelOffsetBytes = header.OffsetBytes;
     }
 
-    internal static unsafe BitmapImage CreateBlank(int width, int height, int bitsPerPixel)
+    public static BitmapImage CreateBlank(int width, int height, int bitsPerPixel, int srcStride, ReadOnlySpan<byte> sourcePixels) => bitsPerPixel switch
     {
-        bool useColorPalette = bitsPerPixel == 8;    // 8bit gray image must need this.
-        BitmapHeader bitmapHeader = new(width, height, bitsPerPixel, useColorPalette);
-        var buffer = new byte[bitmapHeader.FileSize];
+        8 => Create1ch(width, height, bitsPerPixel, srcStride, sourcePixels),
+        24 => Create3ch(width, height, bitsPerPixel, srcStride, sourcePixels),
+        _ => throw new NotSupportedException($"Unsupported bits/pixel = {bitsPerPixel}")
+    };
 
-        fixed (byte* headPtr = buffer)
+    private static unsafe BitmapImage CreateHeader(int width, int height, int bitsPerPixel)
+    {
+        bool useColorPalette = bitsPerPixel == 8;    // 8bit gray image must need color palette.
+        BitmapHeader bitmapHeader = new(width, height, bitsPerPixel, useColorPalette);
+        var pixels = new byte[bitmapHeader.FileSize];
+
+        fixed (byte* headPtr = pixels)
         {
             *(BitmapHeader*)headPtr = bitmapHeader;
 
             if (useColorPalette)
             {
-                byte* ptr = headPtr + bitmapHeader.GetColorPaletteOffsetBytes();
-                for (int i = 0; i < 256; i++)
+                uint* ptr = (uint*)(headPtr + bitmapHeader.GetColorPaletteOffsetBytes());
+                for (uint i = 0; i < 0x00ff_ffff; i += 0x0001_0101)
+                    *(ptr++) = i;
+            }
+        }
+        return new BitmapImage(pixels, bitmapHeader);
+    }
+
+    private static unsafe BitmapImage Create1ch(int width, int height, int bitsPerPixel, int srcStride, ReadOnlySpan<byte> sourcePixels)
+    {
+        const int ch = 1;
+        ArgumentOutOfRangeException.ThrowIfNotEqual(bitsPerPixel, 8 * ch, nameof(bitsPerPixel));
+
+        var bitmap = CreateHeader(width, height, bitsPerPixel);
+        var destStride = bitmap.Stride;
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(srcStride, destStride, nameof(destStride));
+
+        ref readonly byte srcRefBytes = ref MemoryMarshal.AsRef<byte>(sourcePixels);
+        ref readonly byte destRefBytes = ref MemoryMarshal.AsRef<byte>(bitmap.GetPixelsSpan());
+
+        fixed (byte* srcHead = &srcRefBytes)
+        fixed (byte* destHead = &destRefBytes)
+        {
+            // 画素は左下から右上に向かって記録する仕様
+            for (int y = 0; y < height; y++)
+            {
+                byte* srcRowHead = srcHead + ((height - 1 - y) * srcStride);
+                byte* destRowHead = destHead + (y * destStride);
+                Unsafe.CopyBlockUnaligned(destRowHead, srcRowHead, (uint)srcStride);
+            }
+        }
+        return bitmap;
+    }
+
+    private static unsafe BitmapImage Create3ch(int width, int height, int bitsPerPixel, int srcStride, ReadOnlySpan<byte> sourcePixels)
+    {
+        const int ch = 3;
+        ArgumentOutOfRangeException.ThrowIfNotEqual(bitsPerPixel, 8 * ch, nameof(bitsPerPixel));
+
+        var bitmap = CreateHeader(width, height, bitsPerPixel);
+        var destStride = bitmap.Stride;
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(srcStride, destStride, nameof(destStride));
+
+        ref readonly byte srcRefBytes = ref MemoryMarshal.AsRef<byte>(sourcePixels);
+        ref readonly byte destRefBytes = ref MemoryMarshal.AsRef<byte>(bitmap.GetPixelsSpan());
+
+        fixed (byte* srcHead = &srcRefBytes)
+        fixed (byte* destHead = &destRefBytes)
+        {
+            // 画素は左下から右上に向かって記録する仕様
+            for (int y = 0; y < height; y++)
+            {
+                byte* srcRowHead = srcHead + ((height - 1 - y) * srcStride);
+                byte* destRowHead = destHead + (y * destStride);
+                byte* srcRowTail = srcRowHead + (width * ch);
+                byte* dest = destRowHead;
+
+                // Convert RGB to BGR
+                for (byte* src = srcRowHead; src < srcRowTail; src += ch)
                 {
-                    *(ptr++) = (byte)i;
-                    *(ptr++) = (byte)i;
-                    *(ptr++) = (byte)i;
-                    *(ptr++) = 0;
+                    *(dest++) = *(src + 2);
+                    *(dest++) = *(src + 1);
+                    *(dest++) = *(src + 0);
                 }
             }
         }
-        return new BitmapImage(buffer, bitmapHeader);
+        return bitmap;
     }
 
     internal MemoryStream ToMemoryStream()
     {
-        MemoryStream ms = new(_bs, writable: false);
+        MemoryStream ms = new(_pixels, writable: false);
         ms.Seek(0, SeekOrigin.Begin);
         return ms;
     }
