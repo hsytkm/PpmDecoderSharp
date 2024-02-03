@@ -1,6 +1,6 @@
 # PpmDecoderSharp
 
-Decode Portable PixMap (ppm) images in C#
+Decode Portable PixMap (ppm) images in .NET8.
 
 
 
@@ -20,34 +20,15 @@ Decode Portable PixMap (ppm) images in C#
 ## Usage
 
 ```cs
-IPpmImage image = await PpmImage.ReadAsync(@"C:\test.ppm");
+IPpmImage ppmImage = await PpmImage.ReadAsync(@"C:\image.ppm");
 ```
 
 
 
 ## Not implemented
 
-#### P2
-
-1. MaxLevel 16bit (256~65534)
-
-#### P3
-
-1. MaxLevel 16bit (256~65534)
-
-#### P5
-
-1. MaxLevel 16bit (256~65534)
-
-#### P6
-
-1. MaxLevel 16bit (256~65534)
-
-#### Common
-
 1. BitShift
-2. Save Gray 16bit image
-3. Save Color 16bit image
+
 
 
 
@@ -55,25 +36,25 @@ IPpmImage image = await PpmImage.ReadAsync(@"C:\test.ppm");
 
 > BenchmarkDotNet v0.13.12, Windows 11 (10.0.22621.3007/22H2/2022Update/SunValley2)
 > AMD Ryzen 7 PRO 4750GE with Radeon Graphics, 1 CPU, 16 logical and 8 physical cores
-> .NET SDK 8.0.101
->   [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+> .NET SDK 8.0.200-preview.23624.5
+>   [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2 [AttachedDebugger]
 >   DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
 
 
-| Method     | Filename       | Mean        | Error      | StdDev     | Gen0     | Gen1     | Gen2     | Allocated |
-|----------- |--------------- |------------:|-----------:|-----------:|---------:|---------:|---------:|----------:|
-| ReadHeader | P1-200x200.pbm |    79.32 μs |   0.675 μs |   0.631 μs |   4.0283 |        - |        - |   7.96 KB |
-| ReadImage  | P1-200x200.pbm |   468.76 μs |   9.125 μs |  12.181 μs |  25.3906 |        - |        - |  51.54 KB |
-| ReadHeader | P2-300x200.pgm |    80.59 μs |   0.760 μs |   0.711 μs |   4.0283 |        - |        - |   7.94 KB |
-| ReadImage  | P2-300x200.pgm | 1,282.31 μs |  20.662 μs |  19.327 μs |  35.1563 |        - |        - |  75.31 KB |
-| ReadHeader | P3-300x300.ppm |    79.29 μs |   1.367 μs |   1.278 μs |   4.0283 |        - |        - |   8.13 KB |
-| ReadImage  | P3-300x300.ppm | 8,038.53 μs | 156.604 μs | 192.324 μs |  78.1250 |  78.1250 |  78.1250 |  321.5 KB |
-| ReadHeader | P4-305x400.pbm |    75.70 μs |   1.463 μs |   1.369 μs |   3.7842 |        - |        - |   7.62 KB |
-| ReadImage  | P4-305x400.pbm |   215.10 μs |   2.898 μs |   2.711 μs |  38.0859 |  38.0859 |  38.0859 |  128.4 KB |
-| ReadHeader | P5-300x246.pgm |    77.97 μs |   1.108 μs |   1.036 μs |   3.7842 |        - |        - |   7.76 KB |
-| ReadImage  | P5-300x246.pgm |   116.54 μs |   2.077 μs |   1.943 μs |  41.5039 |        - |        - |  81.42 KB |
-| ReadHeader | P6-640x426.ppm |    74.71 μs |   0.248 μs |   0.207 μs |   3.7842 |        - |        - |   7.76 KB |
-| ReadImage  | P6-640x426.ppm |   517.72 μs |   7.719 μs |   7.927 μs | 249.0234 | 249.0234 | 249.0234 | 808.58 KB |
+| Method     | Filename       |        Mean |      Error |    StdDev |      Median |     Gen0 |     Gen1 |     Gen2 | Allocated |
+| ---------- | -------------- | ----------: | ---------: | --------: | ----------: | -------: | -------: | -------: | --------: |
+| ReadHeader | P1-200x200.pbm |    78.65 us |   0.508 us |  0.475 us |    78.45 us |   4.0283 |        - |        - |   7.96 KB |
+| ReadImage  | P1-200x200.pbm |   459.96 us |   9.005 us | 11.709 us |   455.43 us |  25.3906 |        - |        - |  51.87 KB |
+| ReadHeader | P2-300x200.pgm |    75.32 us |   0.255 us |  0.226 us |    75.34 us |   4.0283 |        - |        - |   7.94 KB |
+| ReadImage  | P2-300x200.pgm | 1,138.71 us |  14.674 us | 13.726 us | 1,140.11 us |  35.1563 |        - |        - |  75.98 KB |
+| ReadHeader | P3-300x300.ppm |    78.10 us |   0.712 us |  0.594 us |    78.21 us |   4.0283 |        - |        - |   8.13 KB |
+| ReadImage  | P3-300x300.ppm | 6,935.08 us | 104.674 us | 97.912 us | 6,985.39 us |  78.1250 |  78.1250 |  78.1250 | 321.88 KB |
+| ReadHeader | P4-305x400.pbm |    77.23 us |   1.494 us |  1.889 us |    76.07 us |   3.7842 |        - |        - |   7.62 KB |
+| ReadImage  | P4-305x400.pbm |   216.83 us |   3.972 us |  3.521 us |   216.33 us |  38.0859 |  38.0859 |  38.0859 | 128.74 KB |
+| ReadHeader | P5-300x246.pgm |    78.56 us |   1.184 us |  1.108 us |    78.68 us |   3.7842 |        - |        - |   7.76 KB |
+| ReadImage  | P5-300x246.pgm |   123.08 us |   2.279 us |  2.132 us |   122.29 us |  41.5039 |        - |        - |  82.11 KB |
+| ReadHeader | P6-640x426.ppm |    79.81 us |   0.578 us |  0.512 us |    79.80 us |   3.7842 |        - |        - |   7.76 KB |
+| ReadImage  | P6-640x426.ppm |   537.06 us |  10.726 us | 17.624 us |   535.36 us | 249.0234 | 249.0234 | 249.0234 | 808.97 KB |
 
 ## References
 

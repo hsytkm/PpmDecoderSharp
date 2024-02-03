@@ -27,10 +27,12 @@ internal static class ImageFileSaver
 
     private static MemoryStream GetBitmapStream(IImage image)
     {
-        // ◆255超は未実装
-        ArgumentOutOfRangeException.ThrowIfNotEqual(image.MaxLevel, 255, nameof(image.MaxLevel));
-
-        var bitmap = BitmapImage.CreateBlank(image.Width, image.Height, image.BytesPerPixel * 8, image.Stride, image.GetRawPixels());
+        (int width, int height, int channels) = (image.Width, image.Height, image.Channels);
+        int bytesPerPixel = channels;   // normalize 8bit
+        int bitsPerPixel = bytesPerPixel * 8;
+        int stride = width * channels;
+        var pixels = image.Get8bitNormalizedPixels();
+        var bitmap = BitmapImage.Create(width, height, bitsPerPixel, stride, pixels);
         return bitmap.ToMemoryStream();
     }
 }

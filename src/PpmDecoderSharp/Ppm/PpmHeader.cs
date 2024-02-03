@@ -45,7 +45,7 @@ internal sealed partial record PpmHeader(
         {
             static int ceilingMaxValueToBitsPerChannel(int value)
             {
-                ArgumentOutOfRangeException.ThrowIfLessThan(value, 0, nameof(value));
+                ArgumentOutOfRangeException.ThrowIfLessThan(value, 0);
 
                 if (value is 0)
                     return 1;
@@ -67,7 +67,7 @@ internal sealed partial record PpmHeader(
         {
             static int ceilingBitsToByte(int bits)
             {
-                ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(bits, 0, nameof(bits));
+                ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(bits, 0);
 
                 int bytes = 0;
                 for (; bits > 0; bits -= 8)

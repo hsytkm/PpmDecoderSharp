@@ -26,6 +26,9 @@ public interface IImage
     /// <summary>Color images are in RGB array</summary>
     ReadOnlySpan<byte> GetRawPixels();
 
+    /// <summary>Color images are in RGB array</summary>
+    ReadOnlySpan<byte> Get8bitNormalizedPixels();
+
     /// <summary>Save the image to a BMP file</summary>
     void SaveToBmp(string? filePath);
 

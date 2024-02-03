@@ -43,6 +43,9 @@ public sealed record PpmImage : IPpmImage, IPpmReader
     public ReadOnlySpan<byte> GetRawPixels() => _pixels.AsSpan();
 
     /// <inheritdoc/>
+    public ReadOnlySpan<byte> Get8bitNormalizedPixels() => PixelLevelNormalizer.Get8bitPixels(_header, _pixels);
+
+    /// <inheritdoc/>
     public void SaveToBmp(string? filePath)
     {
         ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));

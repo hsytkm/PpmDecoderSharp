@@ -30,7 +30,7 @@ internal sealed class BitmapImage
         PixelOffsetBytes = header.OffsetBytes;
     }
 
-    public static BitmapImage CreateBlank(int width, int height, int bitsPerPixel, int srcStride, ReadOnlySpan<byte> sourcePixels) => bitsPerPixel switch
+    public static BitmapImage Create(int width, int height, int bitsPerPixel, int srcStride, ReadOnlySpan<byte> sourcePixels) => bitsPerPixel switch
     {
         8 => Create1ch(width, height, bitsPerPixel, srcStride, sourcePixels),
         24 => Create3ch(width, height, bitsPerPixel, srcStride, sourcePixels),
@@ -60,11 +60,11 @@ internal sealed class BitmapImage
     private static unsafe BitmapImage Create1ch(int width, int height, int bitsPerPixel, int srcStride, ReadOnlySpan<byte> sourcePixels)
     {
         const int ch = 1;
-        ArgumentOutOfRangeException.ThrowIfNotEqual(bitsPerPixel, 8 * ch, nameof(bitsPerPixel));
+        ArgumentOutOfRangeException.ThrowIfNotEqual(bitsPerPixel, 8 * ch);
 
         var bitmap = CreateHeader(width, height, bitsPerPixel);
         var destStride = bitmap.Stride;
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(srcStride, destStride, nameof(destStride));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(srcStride, destStride);
 
         ref readonly byte srcRefBytes = ref MemoryMarshal.AsRef<byte>(sourcePixels);
         ref readonly byte destRefBytes = ref MemoryMarshal.AsRef<byte>(bitmap.GetPixelsSpan());
@@ -86,11 +86,11 @@ internal sealed class BitmapImage
     private static unsafe BitmapImage Create3ch(int width, int height, int bitsPerPixel, int srcStride, ReadOnlySpan<byte> sourcePixels)
     {
         const int ch = 3;
-        ArgumentOutOfRangeException.ThrowIfNotEqual(bitsPerPixel, 8 * ch, nameof(bitsPerPixel));
+        ArgumentOutOfRangeException.ThrowIfNotEqual(bitsPerPixel, 8 * ch);
 
         var bitmap = CreateHeader(width, height, bitsPerPixel);
         var destStride = bitmap.Stride;
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(srcStride, destStride, nameof(destStride));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(srcStride, destStride);
 
         ref readonly byte srcRefBytes = ref MemoryMarshal.AsRef<byte>(sourcePixels);
         ref readonly byte destRefBytes = ref MemoryMarshal.AsRef<byte>(bitmap.GetPixelsSpan());
