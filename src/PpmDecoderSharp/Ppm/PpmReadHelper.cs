@@ -3,115 +3,24 @@ using System.Diagnostics;
 
 namespace PpmDecoderSharp;
 
-/// <summary>
-/// Ppm format image
-/// </summary>
-public sealed record PpmImage : IPpmImage, IPpmReader
+internal static class PpmReadHelper
 {
     private const int PixelTextBufferSize = 4096;
 
-    private readonly PpmHeader _header;
-    private readonly byte[] _pixels;
-
-    /// <inheritdoc/>
-    public int FormatNumber => (int)_header.Format;
-
-    /// <inheritdoc/>
-    public int Width => _header.Width;
-
-    /// <inheritdoc/>
-    public int Height => _header.Height;
-
-    /// <inheritdoc/>
-    public int MaxLevel => _header.MaxLevel;
-
-    /// <inheritdoc/>
-    public int Channels => _header.Channels;
-
-    /// <inheritdoc/>
-    public int BytesPerChannel => _header.BytesPerChannel;
-
-    /// <inheritdoc/>
-    public int BytesPerPixel => _header.BytesPerPixel;
-
-    /// <inheritdoc/>
-    public int Stride => _header.Width * _header.BytesPerPixel;
-
-    /// <inheritdoc/>
-    public string? Comment => _header.Comment;
-
-    private PpmImage(PpmHeader header, byte[] pixels) => (_header, _pixels) = (header, pixels);
-
-    /// <inheritdoc/>
-    public ReadOnlySpan<byte> GetRawPixels() => _pixels.AsSpan();
-
-    /// <inheritdoc/>
-    public void SaveToBmp(string? filePath)
-    {
-        ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
-
-        if (File.Exists(filePath))
-            throw new IOException(nameof(filePath));
-
-        PpmFileSaver.SaveToBmp(this, filePath);
-    }
-
-    /// <inheritdoc/>
-    public async Task SaveToBmpAsync(string? filePath, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
-
-        if (File.Exists(filePath))
-            throw new IOException(nameof(filePath));
-
-        await PpmFileSaver.SaveToBmpAsync(this, filePath, cancellationToken);
-    }
-
-    /// <inheritdoc/>
-    public static async Task<IPpmImage?> ReadAsync(string? filePath, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
-
-        if (!File.Exists(filePath))
-            return null;
-
-        try
+    internal static async Task<byte[]> ReadAsync(Stream stream, PpmHeader header, CancellationToken cancellationToken)
+        => await (header.Format switch
         {
-            using var stream = File.OpenRead(filePath);
-            return await ReadAsync(stream, cancellationToken);
-        }
-        catch (IOException)
-        {
-            Debug.WriteLine("The file may be open by another process.");
-            return null;
-        }
-    }
-
-    /// <inheritdoc/>
-    public static async Task<IPpmImage?> ReadAsync(Stream? stream, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(stream, nameof(stream));
-
-        var header = await PpmHeader.CreateAsync(stream, cancellationToken);
-        if (header is null)
-            return null;
-
-        byte[] pixels = await (header.Format switch
-        {
-            PpmHeader.PixmapFormat.P1 => ReadBinaryTextPixelsAsync(stream, header, cancellationToken),
-            PpmHeader.PixmapFormat.P2 or
-            PpmHeader.PixmapFormat.P3 => ReadValueTextPixelsAsync(stream, header, cancellationToken),
-            PpmHeader.PixmapFormat.P4 => ReadBinaryPixelsAsync(stream, header, cancellationToken),
-            PpmHeader.PixmapFormat.P5 or
-            PpmHeader.PixmapFormat.P6 => ReadValuePixelsAsync(stream, header, cancellationToken),
+            PpmHeader.PixmapFormat.P1 => ReadP1Async(stream, header, cancellationToken),
+            PpmHeader.PixmapFormat.P2 => ReadP2Async(stream, header, cancellationToken),
+            PpmHeader.PixmapFormat.P3 => ReadP3Async(stream, header, cancellationToken),
+            PpmHeader.PixmapFormat.P4 => ReadP4Async(stream, header, cancellationToken),
+            PpmHeader.PixmapFormat.P5 => ReadP5Async(stream, header, cancellationToken),
+            PpmHeader.PixmapFormat.P6 => ReadP6Async(stream, header, cancellationToken),
             _ => throw new NotSupportedException($"Unsupported format : {header.Format}")
         });
 
-        return new PpmImage(header, pixels);
-    }
-
     // P1
-    private static async Task<byte[]> ReadBinaryTextPixelsAsync(Stream stream, PpmHeader header, CancellationToken cancellationToken)
+    private static async Task<byte[]> ReadP1Async(Stream stream, PpmHeader header, CancellationToken cancellationToken)
     {
         if (header.Format != PpmHeader.PixmapFormat.P1)
             throw new NotSupportedException($"Not supported format : {header.Format}");
@@ -122,7 +31,7 @@ public sealed record PpmImage : IPpmImage, IPpmReader
         byte[] pixelTextBuffer = ArrayPool<byte>.Shared.Rent(PixelTextBufferSize);
         try
         {
-            var pixels = new byte[header.ImageSize];
+            var pixels = new byte[header.PixelsAllocatedSize];
 
             int writeIndex = 0;
             bool needCommentCheck = true, isInComment = false;
@@ -178,8 +87,12 @@ public sealed record PpmImage : IPpmImage, IPpmReader
         }
     }
 
-    // P2/P3
-    private static async Task<byte[]> ReadValueTextPixelsAsync(Stream stream, PpmHeader header, CancellationToken cancellationToken)
+    // P2
+    private static async Task<byte[]> ReadP2Async(Stream stream, PpmHeader header, CancellationToken cancellationToken)
+        => await ReadP3Async(stream, header, cancellationToken);
+
+    // P3
+    private static async Task<byte[]> ReadP3Async(Stream stream, PpmHeader header, CancellationToken cancellationToken)
     {
         if (header.Format is not (PpmHeader.PixmapFormat.P2 or PpmHeader.PixmapFormat.P3))
             throw new NotSupportedException($"Not supported format : {header.Format}");
@@ -187,7 +100,7 @@ public sealed record PpmImage : IPpmImage, IPpmReader
         byte[] pixelTextBuffer = ArrayPool<byte>.Shared.Rent(PixelTextBufferSize);
         try
         {
-            var pixels = new byte[header.ImageSize];
+            var pixels = new byte[header.PixelsAllocatedSize];
 
             int pixelWriteIndex = 0;
             bool needCommentCheck = true, isInComment = false;
@@ -233,11 +146,11 @@ public sealed record PpmImage : IPpmImage, IPpmReader
                     {
                         if (tempValue >= 0)
                         {
-                            if (header.BytesPerChannel == 1)
+                            if (header.MaxLevel <= 0xff)
                             {
                                 pixels[pixelWriteIndex++] = (byte)tempValue;
                             }
-                            else if (header.BytesPerChannel == 2)
+                            else if (header.MaxLevel <= 0xffff)
                             {
                                 pixels[pixelWriteIndex++] = (byte)(tempValue >> 8);
                                 pixels[pixelWriteIndex++] = (byte)(tempValue & 0x00ff);
@@ -264,7 +177,7 @@ public sealed record PpmImage : IPpmImage, IPpmReader
     }
 
     // P4
-    private static async Task<byte[]> ReadBinaryPixelsAsync(Stream stream, PpmHeader header, CancellationToken cancellationToken)
+    private static async Task<byte[]> ReadP4Async(Stream stream, PpmHeader header, CancellationToken cancellationToken)
     {
         if (header.Format != PpmHeader.PixmapFormat.P4)
             throw new NotSupportedException($"Not supported format : {header.Format}");
@@ -283,7 +196,7 @@ public sealed record PpmImage : IPpmImage, IPpmReader
             if (readSize != srcSize)
                 throw new NotImplementedException($"Unable to read the intended size. Expected={srcSize}, Actual={readSize}");
 
-            var pixels = new byte[header.ImageSize];
+            var pixels = new byte[header.PixelsAllocatedSize];
             unsafe
             {
                 fixed (byte* destHeadPtr = pixels)
@@ -330,13 +243,17 @@ public sealed record PpmImage : IPpmImage, IPpmReader
         }
     }
 
-    // P5/P6
-    private static async Task<byte[]> ReadValuePixelsAsync(Stream stream, PpmHeader header, CancellationToken cancellationToken)
+    // P5
+    private static async Task<byte[]> ReadP5Async(Stream stream, PpmHeader header, CancellationToken cancellationToken)
+        => await ReadP6Async(stream, header, cancellationToken);
+
+    // P6
+    private static async Task<byte[]> ReadP6Async(Stream stream, PpmHeader header, CancellationToken cancellationToken)
     {
         if (header.Format is not (PpmHeader.PixmapFormat.P5 or PpmHeader.PixmapFormat.P6))
             throw new NotSupportedException($"Not supported format : {header.Format}");
 
-        var pixels = new byte[header.ImageSize];
+        var pixels = new byte[header.PixelsAllocatedSize];
 
         stream.Position = header.PixelOffset;
         int readSize = await stream.ReadAsync(pixels, cancellationToken);
@@ -345,5 +262,4 @@ public sealed record PpmImage : IPpmImage, IPpmReader
 
         return pixels;
     }
-
 }

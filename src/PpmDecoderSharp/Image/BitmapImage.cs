@@ -5,6 +5,9 @@ namespace PpmDecoderSharp;
 
 // [Windows bitmap - Wikipedia](https://ja.wikipedia.org/wiki/Windows_bitmap)
 
+/// <summary>
+/// .bmp file
+/// </summary>
 internal sealed class BitmapImage
 {
     private readonly byte[] _pixels;

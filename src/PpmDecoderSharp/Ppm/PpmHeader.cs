@@ -14,18 +14,19 @@ internal sealed partial record PpmHeader(
     int MaxLevel,
     int PixelOffset,
     string? Comment)
+    : IPpmHeader
 {
     private const int HeaderAllocSize = 512;    // ♪コメントを含んでいたら足りないかも
 
     internal enum PixmapFormat
     {
         Undefined,
-        P1,     // PBM  .pbm  B/W   ASCII
-        P2,     // PGM  .pgm  Gray  ASCII
-        P3,     // PPM  .ppm  RGB   ASCII
-        P4,     // PBM  .pbm  B/W   Binary
-        P5,     // PGM  .pgm  Gray  Binary
-        P6      // PPM  .ppm  RGB   Binary
+        P1 = 1,     // PBM  .pbm  B/W   ASCII
+        P2 = 2,     // PGM  .pgm  Gray  ASCII
+        P3 = 3,     // PPM  .ppm  RGB   ASCII
+        P4 = 4,     // PBM  .pbm  B/W   Binary
+        P5 = 5,     // PGM  .pgm  Gray  Binary
+        P6 = 6      // PPM  .ppm  RGB   Binary
     }
 
     public int Channels => Format switch
@@ -36,18 +37,49 @@ internal sealed partial record PpmHeader(
         _ => throw new NotSupportedException($"Unsupported format : {Format}")
     };
 
-    public int BytesPerChannel => MaxLevel switch
+    /// <summary>Depth</summary>
+    public int BitsPerPixel
     {
-        <= 0x00ff => 1,
-        <= 0xffff => 2,
-        _ => throw new NotSupportedException($"MaxLevel is too large. ({MaxLevel})")
-    };
+        // bitは隙間なく詰められる前提としています
+        get
+        {
+            static int ceilingMaxValueToBitsPerChannel(int value)
+            {
+                ArgumentOutOfRangeException.ThrowIfLessThan(value, 0, nameof(value));
+
+                if (value is 0)
+                    return 1;
+
+                int bits = 0;
+                for (; value > 0; value >>= 1)
+                    bits++;
+                return bits;
+            }
+            var bitsPerChannel = ceilingMaxValueToBitsPerChannel(MaxLevel);
+            return Channels * bitsPerChannel;
+        }
+    }
 
     /// <summary>Depth</summary>
-    public int BytesPerPixel => Channels * BytesPerChannel;
+    public int BytesPerPixel
+    {
+        get
+        {
+            static int ceilingBitsToByte(int bits)
+            {
+                ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(bits, 0, nameof(bits));
+
+                int bytes = 0;
+                for (; bits > 0; bits -= 8)
+                    bytes++;
+                return bytes;
+            }
+            return ceilingBitsToByte(BitsPerPixel);
+        }
+    }
 
     /// <summary>Size of pixels only, excluding header</summary>
-    public int ImageSize => Height * Width * BytesPerPixel;
+    public int PixelsAllocatedSize => Height * Width * BytesPerPixel;
 
     private static PpmHeader? Create(PixmapFormat format, int width, int height, int maxLevel, int pixelOffset, string? comment)
     {

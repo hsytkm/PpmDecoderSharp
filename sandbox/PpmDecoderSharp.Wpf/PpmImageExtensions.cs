@@ -9,22 +9,22 @@ public static class PpmImageExtensions
 {
     private const double Dpi = 96.0;
 
-    public static BitmapSource ToBitmapSource(this IPpmImage ppm, bool isFreeze = true)
+    public static BitmapSource ToBitmapSource(this IImage image, bool isFreeze = true)
     {
-        var bitmap = (ppm.Channels, ppm.BytesPerChannel, ppm.MaxLevel) switch
+        var bitmap = (image.Channels, image.MaxLevel) switch
         {
             // P1/P2/P4/P5
-            (1, 1, 0xff) => ToBitmapSource1ByteMax(ppm, PixelFormats.Gray8),
-            (1, 1, < 0xff) => ToBitmapSource1ByteUnderMax(ppm, PixelFormats.Gray8),
-            (1, 2, 0xffff) => ToBitmapSource2ByteMax(ppm, PixelFormats.Gray8),
-            //(1, 2, < 0xffff) => ToBitmapSource2ByteUnderMax(ppm, PixelFormats.Gray8),
+            (1, 0xff) => ToBitmapSource1ByteMax(image, PixelFormats.Gray8),
+            (1, < 0xff) => ToBitmapSource1ByteUnderMax(image, PixelFormats.Gray8),
+            (1, 0xffff) => ToBitmapSource2ByteMax(image, PixelFormats.Gray8),
+            //(1, < 0xffff) => ToBitmapSource2ByteUnderMax(image, PixelFormats.Gray8),
 
-            // P3/P6
-            (3, 1, 0xff) => ToBitmapSource1ByteMax(ppm, PixelFormats.Rgb24),
-            (3, 1, < 0xff) => ToBitmapSource1ByteUnderMax(ppm, PixelFormats.Rgb24),
-            (3, 2, 0xffff) => ToBitmapSource2ByteMax(ppm, PixelFormats.Rgb24),
-            //(3, 2, < 0xffff) => ToBitmapSource2ByteUnderMax(ppm, PixelFormats.Rgb24),
-            _ => throw new NotImplementedException($"Ch={ppm.Channels}, Bytes/Ch={ppm.BytesPerChannel}, MaxLv={ppm.MaxLevel}")
+            // P3/P6 (ppm pixel array is RGB)
+            (3, 0xff) => ToBitmapSource1ByteMax(image, PixelFormats.Rgb24),
+            (3, < 0xff) => ToBitmapSource1ByteUnderMax(image, PixelFormats.Rgb24),
+            (3, 0xffff) => ToBitmapSource2ByteMax(image, PixelFormats.Rgb24),
+            //(3, < 0xffff) => ToBitmapSource2ByteUnderMax(image, PixelFormats.Rgb24),
+            _ => throw new NotImplementedException($"Ch={image.Channels}, MaxLv={image.MaxLevel}")
         };
 
         if (isFreeze)
@@ -34,33 +34,33 @@ public static class PpmImageExtensions
     }
 
     // Byte=1/MaxLv=255
-    private static unsafe BitmapSource ToBitmapSource1ByteMax(IPpmImage ppm, in PixelFormat pixelFormat)
+    private static unsafe BitmapSource ToBitmapSource1ByteMax(IImage image, in PixelFormat pixelFormat)
     {
-        ArgumentOutOfRangeException.ThrowIfNotEqual(ppm.MaxLevel, 255, nameof(ppm.MaxLevel));
+        ArgumentOutOfRangeException.ThrowIfNotEqual(image.MaxLevel, 255, nameof(image.MaxLevel));
 
-        ref readonly byte refBytes = ref MemoryMarshal.AsRef<byte>(ppm.GetRawPixels());
+        ref readonly byte refBytes = ref MemoryMarshal.AsRef<byte>(image.GetRawPixels());
 
         fixed (byte* srcPtr = &refBytes)
         {
             return BitmapSource.Create(
-                ppm.Width, ppm.Height, Dpi, Dpi, pixelFormat, null,
-                (IntPtr)srcPtr, ppm.Height * ppm.Stride, ppm.Stride);
+                image.Width, image.Height, Dpi, Dpi, pixelFormat, null,
+                (IntPtr)srcPtr, image.Height * image.Stride, image.Stride);
         }
     }
 
     // Byte=1/MaxLv=1~254
-    private static unsafe BitmapSource ToBitmapSource1ByteUnderMax(IPpmImage ppm, in PixelFormat pixelFormat)
+    private static unsafe BitmapSource ToBitmapSource1ByteUnderMax(IImage image, in PixelFormat pixelFormat)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(ppm.MaxLevel, 1, nameof(ppm.MaxLevel));
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(ppm.MaxLevel, 254, nameof(ppm.MaxLevel));
+        ArgumentOutOfRangeException.ThrowIfLessThan(image.MaxLevel, 1, nameof(image.MaxLevel));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(image.MaxLevel, 254, nameof(image.MaxLevel));
 
-        float ratio = 255f / ppm.MaxLevel;
-        int pixelSize = ppm.Stride * ppm.Height;
+        float ratio = 255f / image.MaxLevel;
+        int pixelSize = image.Stride * image.Height;
         byte[] pixels = ArrayPool<byte>.Shared.Rent(pixelSize);
 
         try
         {
-            ref readonly byte refBytes = ref MemoryMarshal.AsRef<byte>(ppm.GetRawPixels());
+            ref readonly byte refBytes = ref MemoryMarshal.AsRef<byte>(image.GetRawPixels());
 
             fixed (byte* srcPtr = &refBytes)
             {
@@ -79,8 +79,8 @@ public static class PpmImageExtensions
             }
 
             return BitmapSource.Create(
-                ppm.Width, ppm.Height, Dpi, Dpi, pixelFormat, null,
-                pixels, ppm.Stride);
+                image.Width, image.Height, Dpi, Dpi, pixelFormat, null,
+                pixels, image.Stride);
         }
         finally
         {
@@ -89,24 +89,24 @@ public static class PpmImageExtensions
     }
 
     // Byte=2/MaxLv=65535(BigEndian)
-    private static unsafe BitmapSource ToBitmapSource2ByteMax(IPpmImage ppm, in PixelFormat pixelFormat)
+    private static unsafe BitmapSource ToBitmapSource2ByteMax(IImage image, in PixelFormat pixelFormat)
     {
-        ArgumentOutOfRangeException.ThrowIfNotEqual(ppm.MaxLevel, 65535, nameof(ppm.MaxLevel));
+        ArgumentOutOfRangeException.ThrowIfNotEqual(image.MaxLevel, 65535, nameof(image.MaxLevel));
 
-        int destBytesPerPixel = ppm.Channels;   // dest=8bit
-        int destStride = ppm.Width * destBytesPerPixel;
-        int destPixelSize = ppm.Height * destStride;
+        int destBytesPerPixel = image.Channels;   // dest=8bit
+        int destStride = image.Width * destBytesPerPixel;
+        int destPixelSize = image.Height * destStride;
         byte[] destPixels = ArrayPool<byte>.Shared.Rent(destPixelSize);
 
         try
         {
-            ref readonly byte srcBytes = ref MemoryMarshal.AsRef<byte>(ppm.GetRawPixels());
+            ref readonly byte srcBytes = ref MemoryMarshal.AsRef<byte>(image.GetRawPixels());
 
             fixed (byte* fixedSrcPtr = &srcBytes)
             fixed (byte* fixedDestPtr = destPixels)
             {
                 ushort* srcHeadPtr = (ushort*)fixedSrcPtr;
-                ushort* srcTailPtr = (ushort*)(fixedSrcPtr + (ppm.Height * ppm.Stride));
+                ushort* srcTailPtr = (ushort*)(fixedSrcPtr + (image.Height * image.Stride));
                 byte* destPtr = fixedDestPtr;
 
                 // Memory is assumed to be contiguous.
@@ -118,7 +118,7 @@ public static class PpmImageExtensions
             }
 
             return BitmapSource.Create(
-                ppm.Width, ppm.Height, Dpi, Dpi, pixelFormat, null,
+                image.Width, image.Height, Dpi, Dpi, pixelFormat, null,
                 destPixels, destStride);
         }
         finally
