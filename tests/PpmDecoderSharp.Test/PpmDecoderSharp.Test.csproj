@@ -28,13 +28,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Assets\*.pbm">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\*.pgm">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\*.ppm">
+    <Folder Include="Assets" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\Assets\ppm\*.p*m" Link="Assets\%(Filename)%(Extension)">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
