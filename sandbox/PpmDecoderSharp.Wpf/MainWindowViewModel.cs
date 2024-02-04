@@ -59,8 +59,8 @@ public partial class MainWindowViewModel : ObservableObject
         if (await PpmImageReader.ReadAsync(filePath, cancellationToken) is not { } image)
             return;
 
-        var filename = $"_output_normalize_{DateTime.Now:yyMMdd_HHmmss}.bmp";
-        await image.SaveToBmpAsync(filename, cancellationToken);
+        var filename = $"{DateTime.Now:yyMMdd_HHmmss}_output_normalize.bmp";
+        await image.SaveNormalizedBitmapToFileAsync(filename, cancellationToken);
         Debug.WriteLine($"Saved : {filename}");
     }
     private bool CanSaveNormalizedImage() => NormalizedImage is not null;
@@ -99,14 +99,12 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanSaveBitShiftedImage))]
     private async Task SaveBitShiftedImageAsync(CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
-
         var filePath = ReviseFilePath(ImageFilePath);
         if (await PpmImageReader.ReadAsync(filePath, cancellationToken) is not { } image)
             return;
 
-        var filename = $"_output_bitshift_{DateTime.Now:yyMMdd_HHmmss}.bmp";
-        await image.SaveToBmpAsync(filename, cancellationToken);
+        var filename = $"{DateTime.Now:yyMMdd_HHmmss}_output_bitshift.bmp";
+        await image.SaveBitShiftedBitmapToFileAsync(filename, BitShift, cancellationToken);
         Debug.WriteLine($"Saved : {filename}");
     }
     private bool CanSaveBitShiftedImage() => BitShiftedImage is not null;

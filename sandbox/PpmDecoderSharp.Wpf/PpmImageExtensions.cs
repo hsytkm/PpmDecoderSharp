@@ -10,13 +10,13 @@ public static class PpmImageExtensions
 
     public static BitmapSource ToBitmapSourceWithNormalization(this IImage image, bool isFreeze = true)
     {
-        var pixelsSpan = image.Get8bitNormalizedPixels();
+        var pixelsSpan = image.GetNormalized8bitPixels();
         return ToBitmapSource(image, pixelsSpan, isFreeze);
     }
 
     public static BitmapSource ToBitmapSourceWithBitShift(this IImage image, int bitShift, bool isFreeze = true)
     {
-        var pixelsSpan = image.Get8bitPixels(bitShift);
+        var pixelsSpan = image.GetBitShifted8bitPixels(bitShift);
         return ToBitmapSource(image, pixelsSpan, isFreeze);
     }
 

@@ -87,7 +87,7 @@
                         Grid.Column="3"
                         Padding="20,5"
                         Command="{Binding SaveBitShiftedImageCommand, Mode=OneTime}"
-                        Content="Save (not implemented)" />
+                        Content="Save" />
                 </Grid>
                 <Image
                     Margin="3"

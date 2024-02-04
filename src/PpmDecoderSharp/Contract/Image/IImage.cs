@@ -23,18 +23,24 @@ public interface IImage
     /// <summary>The number of bytes between two consecutive rows of pixels in an image</summary>
     int Stride { get; }
 
-    /// <summary>Color images are in RGB array</summary>
+    /// <summary>For color images, it is an RGB array</summary>
     ReadOnlySpan<byte> GetRawPixels();
 
-    /// <summary>Color images are in RGB array</summary>
-    ReadOnlySpan<byte> Get8bitNormalizedPixels();
-
-    /// <summary>Color images are in RGB array</summary>
-    ReadOnlySpan<byte> Get8bitPixels(int bitShift);
+    /// <summary>For color images, it is an RGB array</summary>
+    ReadOnlySpan<byte> GetNormalized8bitPixels();
 
     /// <summary>Save the image to a BMP file</summary>
-    void SaveToBmp(string? filePath);
+    void SaveNormalizedBitmapToFile(string? filePath);
 
     /// <summary>Save the image to a BMP file asynchronously</summary>
-    Task SaveToBmpAsync(string? filePath, CancellationToken cancellationToken = default);
+    Task SaveNormalizedBitmapToFileAsync(string? filePath, CancellationToken cancellationToken = default);
+
+    /// <summary>For color images, it is an RGB array</summary>
+    ReadOnlySpan<byte> GetBitShifted8bitPixels(int bitShift);
+
+    /// <summary>Save the image to a BMP file</summary>
+    void SaveBitShiftedBitmapToFile(string? filePath, int bitShift);
+
+    /// <summary>Save the image to a BMP file asynchronously</summary>
+    Task SaveBitShiftedBitmapToFileAsync(string? filePath, int bitShift, CancellationToken cancellationToken = default);
 }
