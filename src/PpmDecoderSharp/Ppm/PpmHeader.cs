@@ -8,7 +8,7 @@ namespace PpmDecoderSharp;
 /// Image header information written in text.
 /// </summary>
 internal sealed partial record PpmHeader(
-    PpmHeader.PixmapFormat Format,
+    PpmPixmapFormat Format,
     int Width,
     int Height,
     int MaxLevel,
@@ -18,22 +18,11 @@ internal sealed partial record PpmHeader(
 {
     private const int HeaderAllocSize = 512;    // ♪コメントを含んでいたら足りないかも
 
-    internal enum PixmapFormat
-    {
-        Undefined,
-        P1 = 1,     // PBM  .pbm  B/W   ASCII
-        P2 = 2,     // PGM  .pgm  Gray  ASCII
-        P3 = 3,     // PPM  .ppm  RGB   ASCII
-        P4 = 4,     // PBM  .pbm  B/W   Binary
-        P5 = 5,     // PGM  .pgm  Gray  Binary
-        P6 = 6      // PPM  .ppm  RGB   Binary
-    }
-
     public int Channels => Format switch
     {
-        PixmapFormat.P1 or PixmapFormat.P4 => 1,    // B/W
-        PixmapFormat.P2 or PixmapFormat.P5 => 1,    // Gray
-        PixmapFormat.P3 or PixmapFormat.P6 => 3,    // RGB
+        PpmPixmapFormat.P1 or PpmPixmapFormat.P4 => 1,  // B/W
+        PpmPixmapFormat.P2 or PpmPixmapFormat.P5 => 1,  // Gray
+        PpmPixmapFormat.P3 or PpmPixmapFormat.P6 => 3,  // RGB
         _ => throw new NotSupportedException($"Unsupported format : {Format}")
     };
 
@@ -81,9 +70,9 @@ internal sealed partial record PpmHeader(
     /// <summary>Size of pixels only, excluding header</summary>
     public int PixelsAllocatedSize => Height * Width * BytesPerPixel;
 
-    private static PpmHeader? Create(PixmapFormat format, int width, int height, int maxLevel, int pixelOffset, string? comment)
+    internal static IPpmHeader? Create(PpmPixmapFormat format, int width, int height, int maxLevel, int pixelOffset, string? comment)
     {
-        if (format is PixmapFormat.Undefined)
+        if (format is PpmPixmapFormat.Undefined)
             return null;
 
         if (width < 1 || height < 1)
@@ -92,13 +81,13 @@ internal sealed partial record PpmHeader(
         if (maxLevel < 1 || 0xffff < maxLevel)
             return null;
 
-        if (pixelOffset <= 0)   // must be positive
+        if (pixelOffset < 0)    // Allow 0 for raw images
             return null;
 
-        return new(format, width, height, maxLevel, pixelOffset, comment);
+        return new PpmHeader(format, width, height, maxLevel, pixelOffset, comment);
     }
 
-    internal static async Task<PpmHeader?> CreateAsync(Stream stream, CancellationToken cancellationToken)
+    internal static async Task<IPpmHeader?> CreateAsync(Stream stream, CancellationToken cancellationToken)
     {
         byte[] bs = ArrayPool<byte>.Shared.Rent(HeaderAllocSize);
         try
@@ -115,24 +104,24 @@ internal sealed partial record PpmHeader(
     }
 
     // ♪private化したい。テスト用にinternal
-    internal static PpmHeader? ParseHeaderText(string headerText)
+    internal static IPpmHeader? ParseHeaderText(string headerText)
     {
         if (headerText.Length < 2)
             return null;
 
         return headerText.AsSpan()[0..2] switch
         {
-            "P1" => ParseHeaderTextWithoutMax(PixmapFormat.P1, headerText),
-            "P2" => ParseHeaderTextWithMax(PixmapFormat.P2, headerText),
-            "P3" => ParseHeaderTextWithMax(PixmapFormat.P3, headerText),
-            "P4" => ParseHeaderTextWithoutMax(PixmapFormat.P4, headerText),
-            "P5" => ParseHeaderTextWithMax(PixmapFormat.P5, headerText),
-            "P6" => ParseHeaderTextWithMax(PixmapFormat.P6, headerText),
+            "P1" => ParseHeaderTextWithoutMax(PpmPixmapFormat.P1, headerText),
+            "P2" => ParseHeaderTextWithMax(PpmPixmapFormat.P2, headerText),
+            "P3" => ParseHeaderTextWithMax(PpmPixmapFormat.P3, headerText),
+            "P4" => ParseHeaderTextWithoutMax(PpmPixmapFormat.P4, headerText),
+            "P5" => ParseHeaderTextWithMax(PpmPixmapFormat.P5, headerText),
+            "P6" => ParseHeaderTextWithMax(PpmPixmapFormat.P6, headerText),
             _ => null,
         };
     }
 
-    private static PpmHeader? ParseHeaderTextWithoutMax(PixmapFormat format, string headerText)
+    private static IPpmHeader? ParseHeaderTextWithoutMax(PpmPixmapFormat format, string headerText)
     {
         var match = PpmHeaderRegex14().Match(headerText);
         if (!match.Success)
@@ -157,7 +146,7 @@ internal sealed partial record PpmHeader(
         return Create(format, width, height, 1, offset, comment);
     }
 
-    private static PpmHeader? ParseHeaderTextWithMax(PixmapFormat format, string headerText)
+    private static IPpmHeader? ParseHeaderTextWithMax(PpmPixmapFormat format, string headerText)
     {
         var match = PpmHeaderRegex2356().Match(headerText);
         if (!match.Success)

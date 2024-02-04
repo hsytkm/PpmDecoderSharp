@@ -29,11 +29,11 @@ public partial class MainWindowViewModel : ObservableObject
     private async Task ReadImageAsync(CancellationToken cancellationToken)
     {
         var filePath = ReviseFilePath(ImageFilePath);
-        var ppm = await PpmImage.ReadAsync(filePath, cancellationToken);
-        if (ppm is not null)
+        var image = await PpmImageReader.ReadAsync(filePath, cancellationToken);
+        if (image is not null)
         {
-            PpmProp = new PpmProperty(ppm);
-            ImageSource = ppm.ToBitmapSource();
+            PpmProp = new PpmProperty(image);
+            ImageSource = image.ToBitmapSource();
         }
         else
         {
@@ -46,11 +46,11 @@ public partial class MainWindowViewModel : ObservableObject
     private async Task SaveImageAsync(CancellationToken cancellationToken)
     {
         var filePath = ReviseFilePath(ImageFilePath);
-        if (await PpmImage.ReadAsync(filePath, cancellationToken) is not { } ppm)
+        if (await PpmImageReader.ReadAsync(filePath, cancellationToken) is not { } image)
             return;
 
         var filename = $"_output_{DateTime.Now:yyMMdd_HHmmss}.bmp";
-        await ppm.SaveToBmpAsync(filename, cancellationToken);
+        await image.SaveToBmpAsync(filename, cancellationToken);
         Debug.WriteLine($"Saved : {filename}");
     }
     bool CanSaveImage() => ImageSource is not null;

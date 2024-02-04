@@ -43,17 +43,17 @@ public class ReadImageTest
         int formatNumber, int width, int height, int maxLevel, string? comment,
         string expectedHashString, CancellationToken cancellationToken = default)
     {
-        var ppm = await PpmImage.ReadAsync(filePath, cancellationToken);
-        Assert.NotNull(ppm);
+        var image = await PpmImageReader.ReadAsync(filePath, cancellationToken);
+        Assert.NotNull(image);
 
-        ppm.FormatNumber.Should().Be(formatNumber);
-        ppm.Width.Should().Be(width);
-        ppm.Height.Should().Be(height);
-        ppm.MaxLevel.Should().Be(maxLevel);
-        ppm.Comment.Should().Be(comment);
+        image.FormatNumber.Should().Be(formatNumber);
+        image.Width.Should().Be(width);
+        image.Height.Should().Be(height);
+        image.MaxLevel.Should().Be(maxLevel);
+        image.Comment.Should().Be(comment);
 
         var actualHash = new byte[32];    // 256bit=32Byte
-        System.Security.Cryptography.SHA256.TryHashData(ppm.GetRawPixels(), actualHash, out int bytesWritten).Should().BeTrue();
+        System.Security.Cryptography.SHA256.TryHashData(image.GetRawPixels(), actualHash, out int bytesWritten).Should().BeTrue();
 
         var actualHashString = BitConverter.ToString(actualHash.AsSpan()[..bytesWritten].ToArray()).Replace("-", "");
         actualHashString.Should().Be(expectedHashString);

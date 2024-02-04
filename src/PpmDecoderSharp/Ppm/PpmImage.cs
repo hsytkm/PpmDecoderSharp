@@ -1,13 +1,11 @@
-﻿using System.Diagnostics;
-
-namespace PpmDecoderSharp;
+﻿namespace PpmDecoderSharp;
 
 /// <summary>
 /// Ppm format image
 /// </summary>
-public sealed record PpmImage : IPpmImage, IPpmReader
+public sealed record PpmImage : IPpmImage
 {
-    private readonly PpmHeader _header;
+    private readonly IPpmHeader _header;
     private readonly byte[] _pixels;
 
     /// <inheritdoc/>
@@ -37,7 +35,7 @@ public sealed record PpmImage : IPpmImage, IPpmReader
     /// <inheritdoc/>
     public string? Comment => _header.Comment;
 
-    private PpmImage(PpmHeader header, byte[] pixels) => (_header, _pixels) = (header, pixels);
+    internal PpmImage(IPpmHeader header, byte[] pixels) => (_header, _pixels) = (header, pixels);
 
     /// <inheritdoc/>
     public ReadOnlySpan<byte> GetRawPixels() => _pixels.AsSpan();
@@ -48,7 +46,7 @@ public sealed record PpmImage : IPpmImage, IPpmReader
     /// <inheritdoc/>
     public void SaveToBmp(string? filePath)
     {
-        ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
+        ArgumentNullException.ThrowIfNull(filePath);
 
         if (File.Exists(filePath))
             throw new IOException(nameof(filePath));
@@ -59,44 +57,11 @@ public sealed record PpmImage : IPpmImage, IPpmReader
     /// <inheritdoc/>
     public async Task SaveToBmpAsync(string? filePath, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
+        ArgumentNullException.ThrowIfNull(filePath);
 
         if (File.Exists(filePath))
             throw new IOException(nameof(filePath));
 
         await ImageFileSaver.SaveToBmpAsync(this, filePath, cancellationToken);
-    }
-
-    /// <inheritdoc/>
-    public static async Task<IPpmImage?> ReadAsync(string? filePath, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(filePath, nameof(filePath));
-
-        if (!File.Exists(filePath))
-            return null;
-
-        try
-        {
-            using var stream = File.OpenRead(filePath);
-            return await ReadAsync(stream, cancellationToken);
-        }
-        catch (IOException)
-        {
-            Debug.WriteLine("The file may be open by another process.");
-            return null;
-        }
-    }
-
-    /// <inheritdoc/>
-    public static async Task<IPpmImage?> ReadAsync(Stream? stream, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(stream, nameof(stream));
-
-        var header = await PpmHeader.CreateAsync(stream, cancellationToken);
-        if (header is null)
-            return null;
-
-        byte[] pixels = await PpmReadHelper.ReadAsync(stream, header, cancellationToken);
-        return new PpmImage(header, pixels);
     }
 }

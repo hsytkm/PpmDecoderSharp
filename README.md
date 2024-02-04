@@ -20,7 +20,11 @@ Decode Portable PixMap (ppm) images in .NET8.
 ## Usage
 
 ```cs
-IPpmImage ppmImage = await PpmImage.ReadAsync(@"C:\image.ppm");
+// Read pbm/pgm/ppm image
+IPpmImage ppmImage = await PpmImageReader.ReadAsync(@"C:\image.ppm");
+
+// Read raw image
+IImage rawImage = await RawImageReader.ReadAsync((@"C:\image.raw", 1920, 1080, 12, 0);
 ```
 
 

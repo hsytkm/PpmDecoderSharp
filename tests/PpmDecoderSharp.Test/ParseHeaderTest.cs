@@ -4,8 +4,8 @@ public class ParseHeaderTest
 {
     public sealed record HeaderRecord(int Type, int Width, int Height, int Max, string? Comment = null)
     {
-        internal static HeaderRecord Create(PpmHeader ppm) =>
-            new((int)ppm.Format, ppm.Width, ppm.Height, ppm.MaxLevel, ppm.Comment);
+        internal static HeaderRecord Create(IPpmHeader header) =>
+            new((int)header.Format, header.Width, header.Height, header.MaxLevel, header.Comment);
     }
 
     [Theory]

@@ -43,7 +43,10 @@ public class DecodePpm
     }
 
     [Benchmark]
-    public async ValueTask ReadImage() => _ = await PpmDecoderSharp.PpmImage.ReadAsync(_imageFilePath);
+    public async ValueTask ReadImage()
+    {
+        _ = await PpmDecoderSharp.PpmImageReader.ReadAsync(_imageFilePath);
+    }
 
     //[GlobalCleanup] public void GlobalCleanup() { }
 }
