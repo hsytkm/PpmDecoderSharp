@@ -8,17 +8,19 @@ public static class PpmImageExtensions
 {
     private const double Dpi = 96.0;
 
-    public static BitmapSource ToBitmapSource(this IImage image, bool isFreeze = true)
+    public static BitmapSource ToBitmapSourceWithNormalization(this IImage image, bool isFreeze = true)
     {
-        var bitmap = ToBitmapSource(image);
-
-        if (isFreeze)
-            bitmap.Freeze();
-
-        return bitmap;
+        var pixelsSpan = image.Get8bitNormalizedPixels();
+        return ToBitmapSource(image, pixelsSpan, isFreeze);
     }
 
-    private static unsafe BitmapSource ToBitmapSource(IImage image)
+    public static BitmapSource ToBitmapSourceWithBitShift(this IImage image, int bitShift, bool isFreeze = true)
+    {
+        var pixelsSpan = image.Get8bitPixels(bitShift);
+        return ToBitmapSource(image, pixelsSpan, isFreeze);
+    }
+
+    private static unsafe BitmapSource ToBitmapSource(IImage image, ReadOnlySpan<byte> pixelsSpan, bool isFreeze)
     {
         (int imageWidth, int imageHeight, int imageChannels) = (image.Width, image.Height, image.Channels);
         int stride = imageWidth * imageChannels;   // 8bit
@@ -29,13 +31,17 @@ public static class PpmImageExtensions
             _ => throw new NotSupportedException($"Ch={imageChannels}")
         };
 
-        var pixelsSpan = image.Get8bitNormalizedPixels();
         ref readonly byte refPixels = ref MemoryMarshal.AsRef<byte>(pixelsSpan);
         fixed (byte* ptr = &refPixels)
         {
-            return BitmapSource.Create(
+            var bitmap = BitmapSource.Create(
                 imageWidth, imageHeight, Dpi, Dpi, pixelFormat, null,
                 (IntPtr)ptr, imageHeight * stride, stride);
+
+            if (isFreeze)
+                bitmap.Freeze();
+
+            return bitmap;
         }
     }
 }

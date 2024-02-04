@@ -2,8 +2,6 @@
 
 Decode Portable PixMap (ppm) images in .NET8.
 
-
-
 ## Portable PixMap
 
 | Magic Number | Type | Extension | Image Type | Encoding |
@@ -15,8 +13,6 @@ Decode Portable PixMap (ppm) images in .NET8.
 | P5           | PGM  | .pgm      | Gray       | Binary   |
 | P6           | PPM  | .ppm      | RGB        | Binary   |
 
-
-
 ## Usage
 
 ```cs
@@ -26,15 +22,6 @@ IPpmImage ppmImage = await PpmImageReader.ReadAsync(@"C:\image.ppm");
 // Read raw image
 IImage rawImage = await RawImageReader.ReadAsync((@"C:\image.raw", 1920, 1080, 12, 0);
 ```
-
-
-
-## Not implemented
-
-1. BitShift
-
-
-
 
 ## Benchmark [WIP]
 

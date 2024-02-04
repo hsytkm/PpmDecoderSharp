@@ -50,7 +50,7 @@ internal sealed class BitmapImage
             if (useColorPalette)
             {
                 uint* ptr = (uint*)(headPtr + bitmapHeader.GetColorPaletteOffsetBytes());
-                for (uint i = 0; i < 0x00ff_ffff; i += 0x0001_0101)
+                for (uint i = 0; i <= 0x00ff_ffff; i += 0x0001_0101)
                     *(ptr++) = i;
             }
         }
@@ -63,7 +63,7 @@ internal sealed class BitmapImage
         ArgumentOutOfRangeException.ThrowIfNotEqual(bitsPerPixel, 8 * ch);
 
         var bitmap = CreateHeader(width, height, bitsPerPixel);
-        var destStride = bitmap.Stride;
+        int destStride = bitmap.Stride;
         ArgumentOutOfRangeException.ThrowIfGreaterThan(srcStride, destStride);
 
         ref readonly byte srcRefBytes = ref MemoryMarshal.AsRef<byte>(sourcePixels);
@@ -89,7 +89,7 @@ internal sealed class BitmapImage
         ArgumentOutOfRangeException.ThrowIfNotEqual(bitsPerPixel, 8 * ch);
 
         var bitmap = CreateHeader(width, height, bitsPerPixel);
-        var destStride = bitmap.Stride;
+        int destStride = bitmap.Stride;
         ArgumentOutOfRangeException.ThrowIfGreaterThan(srcStride, destStride);
 
         ref readonly byte srcRefBytes = ref MemoryMarshal.AsRef<byte>(sourcePixels);
@@ -160,8 +160,8 @@ internal sealed class BitmapImage
 
         internal BitmapHeader(int width, int height, int bitsPerPixel, bool useColorPalette)
         {
-            var headerSize = FileHeaderSize + InfoHeaderSize + (useColorPalette ? ColorPalettesSize : 0);
-            var imageSize = GetImageSize(width, height, bitsPerPixel);
+            int headerSize = FileHeaderSize + InfoHeaderSize + (useColorPalette ? ColorPalettesSize : 0);
+            int imageSize = GetImageSize(width, height, bitsPerPixel);
 
             FileType = FileHeaderValue;
             FileSize = headerSize + imageSize;
@@ -195,7 +195,7 @@ internal sealed class BitmapImage
 
         private static int GetStride(int width, int bitsPerPixel)
         {
-            var bytesPerPixel = BitsToBytes(bitsPerPixel);
+            int bytesPerPixel = BitsToBytes(bitsPerPixel);
             return (width * bytesPerPixel + (4 - 1)) / 4 * 4;   // multiple of 4
         }
 
