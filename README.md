@@ -1,8 +1,6 @@
 # PpmDecoderSharp
 
-Decode Portable PixMap (ppm) images in .NET8.
-
-## Portable PixMap
+Decode Portable PixMap images in .NET8.
 
 | Magic Number | Type | Extension | Image Type | Encoding |
 | ------------ | ---- | --------- | ---------- | -------- |

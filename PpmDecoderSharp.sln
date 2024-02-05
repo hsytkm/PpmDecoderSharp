@@ -5,18 +5,17 @@ VisualStudioVersion = 17.9.34414.90
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PpmDecoderSharp", "src\PpmDecoderSharp\PpmDecoderSharp.csproj", "{E007F5B8-414F-46E6-A1FE-F85EA46A6B09}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{05C4F916-5873-406F-8DC7-4224DCE4E313}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PpmDecoderSharp.Test", "tests\PpmDecoderSharp.Test\PpmDecoderSharp.Test.csproj", "{3E0F45A5-17EE-46E4-9C02-13CE609D666C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PpmDecoderSharp.Test", "src\PpmDecoderSharp.Test\PpmDecoderSharp.Test.csproj", "{3E0F45A5-17EE-46E4-9C02-13CE609D666C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sandbox", "sandbox", "{96F1D23E-ADE7-4264-949E-94B737F07CBA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PpmDecoderSharp.Wpf", "sandbox\PpmDecoderSharp.Wpf\PpmDecoderSharp.Wpf.csproj", "{163008A3-567D-4207-82F4-078B35D95FDE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PpmDecoderSharp.Wpf", "src\sandbox\PpmDecoderSharp.Wpf\PpmDecoderSharp.Wpf.csproj", "{163008A3-567D-4207-82F4-078B35D95FDE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DecodeBenchmark", "sandbox\DecodeBenchmark\DecodeBenchmark.csproj", "{C2708ADD-DEB6-45EE-9FBE-254E0389178A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DecodeBenchmark", "src\sandbox\DecodeBenchmark\DecodeBenchmark.csproj", "{C2708ADD-DEB6-45EE-9FBE-254E0389178A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B1FF21D0-942C-4161-A15C-24C13AF14354}"
 	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -47,7 +46,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{3E0F45A5-17EE-46E4-9C02-13CE609D666C} = {05C4F916-5873-406F-8DC7-4224DCE4E313}
 		{163008A3-567D-4207-82F4-078B35D95FDE} = {96F1D23E-ADE7-4264-949E-94B737F07CBA}
 		{C2708ADD-DEB6-45EE-9FBE-254E0389178A} = {96F1D23E-ADE7-4264-949E-94B737F07CBA}
 	EndGlobalSection

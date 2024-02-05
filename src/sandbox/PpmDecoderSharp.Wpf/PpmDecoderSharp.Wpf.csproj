@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\PpmDecoderSharp\PpmDecoderSharp.csproj" />
+    <ProjectReference Include="..\..\PpmDecoderSharp\PpmDecoderSharp.csproj" />
   </ItemGroup>
 
 </Project>
