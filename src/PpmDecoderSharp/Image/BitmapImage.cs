@@ -34,7 +34,7 @@ internal sealed class BitmapImage
     {
         8 => Create1ch(width, height, bitsPerPixel, srcStride, sourcePixels),
         24 => Create3ch(width, height, bitsPerPixel, srcStride, sourcePixels),
-        _ => throw new NotSupportedException($"Unsupported bits/pixel = {bitsPerPixel}")
+        _ => throw new NotSupportedException($"Not supported bits/pixel = {bitsPerPixel}")
     };
 
     private static unsafe BitmapImage CreateHeader(int width, int height, int bitsPerPixel)

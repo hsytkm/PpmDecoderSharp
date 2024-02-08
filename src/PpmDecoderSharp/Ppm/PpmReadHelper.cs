@@ -16,7 +16,7 @@ internal static class PpmReadHelper
             PpmPixmapFormat.P4 => ReadP4Async(stream, header, cancellationToken),
             PpmPixmapFormat.P5 => ReadP5Async(stream, header, cancellationToken),
             PpmPixmapFormat.P6 => ReadP6Async(stream, header, cancellationToken),
-            _ => throw new NotSupportedException($"Unsupported format : {header.Format}")
+            _ => throw new NotSupportedException($"Not supported format : {header.Format}")
         });
 
     // P1

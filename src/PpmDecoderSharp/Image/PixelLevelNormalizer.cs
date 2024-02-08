@@ -11,7 +11,7 @@ internal static class PixelLevelNormalizer
         0xff => rawPixels,
         > 0 and < 0xff => Get8bitPixels_LessThan255(header, rawPixels),
         > 0xff and <= 0xffff => Get8bitPixels_LessThanOrEqual65535(header, rawPixels),
-        _ => throw new NotImplementedException($"Unsupported format. ({header.MaxLevel})")
+        _ => throw new NotImplementedException($"Not supported format. ({header.MaxLevel})")
     };
 
     // continuous assumption

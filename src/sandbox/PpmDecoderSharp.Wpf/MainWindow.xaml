@@ -68,14 +68,14 @@
                     <Button
                         Grid.Column="0"
                         Width="30"
-                        Command="{Binding IncrementBitShiftCommand, Mode=OneTime}"
-                        Content="++"
+                        Command="{Binding DecrementBitShiftCommand, Mode=OneTime}"
+                        Content="--"
                         DockPanel.Dock="Right" />
                     <Button
                         Grid.Column="1"
                         Width="30"
-                        Command="{Binding DecrementBitShiftCommand, Mode=OneTime}"
-                        Content="--"
+                        Command="{Binding IncrementBitShiftCommand, Mode=OneTime}"
+                        Content="++"
                         DockPanel.Dock="Right" />
                     <TextBlock
                         Grid.Column="2"

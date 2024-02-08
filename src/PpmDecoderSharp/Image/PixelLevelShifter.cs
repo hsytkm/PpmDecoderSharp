@@ -10,7 +10,7 @@ internal static class PixelLevelShifter
     {
         > 0 and <= 0xff => Get8bitPixels_1Byte(header, rawPixels, bitShift),
         > 0xff and <= 0xffff => Get8bitPixels_2Byte(header, rawPixels, bitShift),
-        _ => throw new NotImplementedException($"Unsupported format. ({header.MaxLevel})")
+        _ => throw new NotImplementedException($"Not supported format. ({header.MaxLevel})")
     };
 
     // continuous assumption

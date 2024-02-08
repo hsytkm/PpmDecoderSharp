@@ -3,7 +3,7 @@
 /// <summary>
 /// Ppm format image
 /// </summary>
-public sealed record PpmImage : IPpmImage
+internal sealed record PpmImage : IPpmImage
 {
     private readonly IPpmHeader _header;
     private readonly byte[] _pixels;
