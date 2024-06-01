@@ -1,5 +1,8 @@
-﻿namespace PpmDecoderSharp;
+﻿using System.Diagnostics;
 
+namespace PpmDecoderSharp;
+
+[DebuggerDisplay("W={Width}, H={Height}, Max={MaxLevel}, Ch={ChannelCount}")]
 internal /*sealed*/ class RawImage : IImage
 {
     private readonly IImageHeader _header;

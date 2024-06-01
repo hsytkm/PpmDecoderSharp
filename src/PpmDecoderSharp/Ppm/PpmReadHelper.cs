@@ -7,7 +7,10 @@ internal static class PpmReadHelper
 {
     private const int PixelTextBufferSize = 4096;
 
-    internal static async Task<byte[]> ReadAsync(Stream stream, IPpmHeader header, CancellationToken cancellationToken)
+    /// <summary>
+    /// Read ppm image
+    /// </summary>
+    internal static async Task<byte[]> ReadAsync(Stream stream, PpmHeader header, CancellationToken cancellationToken)
         => await (header.Format switch
         {
             PpmPixmapFormat.P1 => ReadP1Async(stream, header, cancellationToken),
@@ -19,12 +22,15 @@ internal static class PpmReadHelper
             _ => throw new NotSupportedException($"Not supported format : {header.Format}")
         });
 
-    // P1
-    private static async Task<byte[]> ReadP1Async(Stream stream, IPpmHeader header, CancellationToken cancellationToken)
-    {
-        if (header.Format != PpmPixmapFormat.P1)
-            throw new NotSupportedException($"Not supported format : {header.Format}");
+    /// <summary>
+    /// Read raw image(1ch binary=P5)
+    /// </summary>
+    internal static async Task<byte[]> ReadAsync(Stream stream, RawHeader header, CancellationToken cancellationToken)
+        => await ReadP5Async(stream, header, cancellationToken);
 
+    // P1
+    private static async Task<byte[]> ReadP1Async(Stream stream, IImageHeader header, CancellationToken cancellationToken)
+    {
         if (header.MaxLevel != 1)
             throw new NotSupportedException($"Not supported max level : {header.MaxLevel}");
 
@@ -88,15 +94,12 @@ internal static class PpmReadHelper
     }
 
     // P2
-    private static async Task<byte[]> ReadP2Async(Stream stream, IPpmHeader header, CancellationToken cancellationToken)
+    private static async Task<byte[]> ReadP2Async(Stream stream, IImageHeader header, CancellationToken cancellationToken)
         => await ReadP3Async(stream, header, cancellationToken);
 
     // P3
-    private static async Task<byte[]> ReadP3Async(Stream stream, IPpmHeader header, CancellationToken cancellationToken)
+    private static async Task<byte[]> ReadP3Async(Stream stream, IImageHeader header, CancellationToken cancellationToken)
     {
-        if (header.Format is not (PpmPixmapFormat.P2 or PpmPixmapFormat.P3))
-            throw new NotSupportedException($"Not supported format : {header.Format}");
-
         byte[] pixelTextBuffer = ArrayPool<byte>.Shared.Rent(PixelTextBufferSize);
         try
         {
@@ -177,11 +180,8 @@ internal static class PpmReadHelper
     }
 
     // P4
-    private static async Task<byte[]> ReadP4Async(Stream stream, IPpmHeader header, CancellationToken cancellationToken)
+    private static async Task<byte[]> ReadP4Async(Stream stream, IImageHeader header, CancellationToken cancellationToken)
     {
-        if (header.Format != PpmPixmapFormat.P4)
-            throw new NotSupportedException($"Not supported format : {header.Format}");
-
         if (header.MaxLevel != 1)
             throw new NotSupportedException($"Not supported max level : {header.MaxLevel}");
 
@@ -243,16 +243,13 @@ internal static class PpmReadHelper
         }
     }
 
-    // P5
-    private static async Task<byte[]> ReadP5Async(Stream stream, IPpmHeader header, CancellationToken cancellationToken)
+    // P5 (internal for RawReader)
+    private static async Task<byte[]> ReadP5Async(Stream stream, IImageHeader header, CancellationToken cancellationToken)
         => await ReadP6Async(stream, header, cancellationToken);
 
     // P6
-    private static async Task<byte[]> ReadP6Async(Stream stream, IPpmHeader header, CancellationToken cancellationToken)
+    private static async Task<byte[]> ReadP6Async(Stream stream, IImageHeader header, CancellationToken cancellationToken)
     {
-        if (header.Format is not (PpmPixmapFormat.P5 or PpmPixmapFormat.P6))
-            throw new NotSupportedException($"Not supported format : {header.Format}");
-
         var pixels = new byte[header.PixelsAllocatedSize];
 
         stream.Position = header.PixelOffset;

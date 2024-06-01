@@ -6,20 +6,19 @@ public static class RawImageReader
 {
     /// <summary>Read raw image from stream</summary>
     public static async Task<IImage?> ReadAsync(
-        Stream? stream, int width, int height, int rawBits, int stride, int pixelOffset,
+        Stream? stream, int width, int height, int rawBits, int stride, int pixelOffset = 0,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(stream);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(height);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(rawBits);
-        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(stride, GetBurstStride(width, height, rawBits));
+        ArgumentOutOfRangeException.ThrowIfLessThan(stride, GetRawBurstStride(width, rawBits));
         ArgumentOutOfRangeException.ThrowIfNegative(pixelOffset);
 
         int maxLevel = (1 << rawBits) - 1;
 
-        // Read raw image using P5(1ch binary)
-        var header = PpmHeaderUtil.Create(PpmPixmapFormat.P5, width, height, maxLevel, pixelOffset, null);
+        var header = new RawHeader(width, height, maxLevel, rawBits, stride, pixelOffset);
         if (header is null)
             return null;
 
@@ -33,13 +32,13 @@ public static class RawImageReader
         CancellationToken cancellationToken = default)
     {
         const int pixelOffset = 0;
-        int stride = GetBurstStride(width, height, rawBits);
+        int stride = GetRawBurstStride(width, rawBits);
         return await ReadAsync(stream, width, height, rawBits, stride, pixelOffset, cancellationToken);
     }
 
     /// <summary>Read raw image from file</summary>
     public static async Task<IImage?> ReadAsync(
-        string? filePath, int width, int height, int rawBits, int stride, int pixelOffset,
+        string? filePath, int width, int height, int rawBits, int stride, int pixelOffset = 0,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(filePath);
@@ -65,11 +64,11 @@ public static class RawImageReader
         CancellationToken cancellationToken = default)
     {
         const int pixelOffset = 0;
-        int stride = GetBurstStride(width, height, rawBits);
+        int stride = GetRawBurstStride(width, rawBits);
         return await ReadAsync(filePath, width, height, rawBits, stride, pixelOffset, cancellationToken);
     }
 
-    private static int GetBurstStride(int width, int height, int rawBits)
+    private static int GetRawBurstStride(int width, int rawBits)
     {
         int pixelPerBytes = rawBits switch
         {
@@ -77,6 +76,6 @@ public static class RawImageReader
             <= 16 => 2,
             _ => throw new NotSupportedException()
         };
-        return height * width * pixelPerBytes;
+        return width * pixelPerBytes;   // Raw image is 1ch.
     }
 }

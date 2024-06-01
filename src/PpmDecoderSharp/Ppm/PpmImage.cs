@@ -1,8 +1,11 @@
-﻿namespace PpmDecoderSharp;
+﻿using System.Diagnostics;
+
+namespace PpmDecoderSharp;
 
 /// <summary>
 /// Ppm format image
 /// </summary>
+[DebuggerDisplay("P{(int)FormatNumber}, W={Width}, H={Height}, Max={MaxLevel}, Ch={ChannelCount}")]
 internal sealed class PpmImage : RawImage, IPpmImage
 {
     /// <inheritdoc/>
