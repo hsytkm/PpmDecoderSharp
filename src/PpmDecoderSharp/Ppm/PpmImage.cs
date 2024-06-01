@@ -18,7 +18,7 @@ internal sealed record PpmImage : IPpmImage
     public int MaxLevel => _header.MaxLevel;
 
     /// <inheritdoc/>
-    public int Channels => _header.Channels;
+    public int ChannelCount => _header.ChannelCount;
 
     /// <inheritdoc/>
     public int BitsPerPixel => _header.BitsPerPixel;

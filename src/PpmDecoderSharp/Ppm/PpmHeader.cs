@@ -19,7 +19,7 @@ internal sealed partial record PpmHeader(
     private const int HeaderAllocSize = 512;    // ♪コメントを含んでいたら足りないかも
 
     /// <inheritdoc />
-    public int Channels => Format switch
+    public int ChannelCount => Format switch
     {
         PpmPixmapFormat.P1 or PpmPixmapFormat.P4 => 1,  // B/W
         PpmPixmapFormat.P2 or PpmPixmapFormat.P5 => 1,  // Gray
@@ -46,7 +46,7 @@ internal sealed partial record PpmHeader(
                 return bits;
             }
             var bitsPerChannel = ceilingMaxValueToBitsPerChannel(MaxLevel);
-            return Channels * bitsPerChannel;
+            return ChannelCount * bitsPerChannel;
         }
     }
 

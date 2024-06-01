@@ -12,7 +12,7 @@ public interface IImageHeader
     int MaxLevel { get; }
 
     /// <summary>Gray=1,Color=3</summary>
-    int Channels { get; }
+    int ChannelCount { get; }
 
     /// <summary>Multiplication result of Channels and Depth.</summary>
     int BitsPerPixel { get; }
@@ -20,11 +20,11 @@ public interface IImageHeader
     /// <summary>Multiplication result of Channels and Depth.(8bit,3ch -> 3Byte)</summary>
     int BytesPerPixel { get; }
 
+    /// <summary>The number of bytes between two consecutive rows of pixels in an image</summary>
+    int Stride { get; }
+
     /// <summary>Offset from the beginning of the file to pixels.</summary>
     int PixelOffset { get; }
-
-    /// <summary>Bytes from the start of one row of pixels to the start of the next row.</summary>
-    int Stride { get; }
 
     /// <summary>Allocated size for pixels</summary>
     int PixelsAllocatedSize { get; }
