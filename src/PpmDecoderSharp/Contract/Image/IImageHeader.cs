@@ -23,6 +23,9 @@ public interface IImageHeader
     /// <summary>Offset from the beginning of the file to pixels.</summary>
     int PixelOffset { get; }
 
+    /// <summary>Bytes from the start of one row of pixels to the start of the next row.</summary>
+    int Stride { get; }
+
     /// <summary>Allocated size for pixels</summary>
     int PixelsAllocatedSize { get; }
 }

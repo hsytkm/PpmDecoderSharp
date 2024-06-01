@@ -27,7 +27,7 @@ internal sealed record PpmImage : IPpmImage
     public int BytesPerPixel => _header.BytesPerPixel;
 
     /// <inheritdoc/>
-    public int Stride => _header.Width * _header.BytesPerPixel;
+    public int Stride => _header.Stride;
 
     /// <inheritdoc/>
     public int FormatNumber => (int)_header.Format;

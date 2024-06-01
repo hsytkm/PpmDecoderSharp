@@ -14,10 +14,6 @@ internal static class PixelLevelNormalizer
         _ => throw new NotImplementedException($"Not supported format. ({header.MaxLevel})")
     };
 
-    // continuous assumption
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int GetSrcStride(IImageHeader header) => header.Width * header.BytesPerPixel;
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int GetDestPixelsSize(IImageHeader header) => header.Height * header.Width * header.Channels;
 
@@ -61,7 +57,7 @@ internal static class PixelLevelNormalizer
         var destPixels = new byte[destPixelsSize];
 
         ref readonly byte srcRefBytes = ref MemoryMarshal.AsRef<byte>(sourcePixels);
-        (int srcHeight, int srcStride) = (header.Height, GetSrcStride(header));
+        (int srcHeight, int srcStride) = (header.Height, header.Stride);
 
         fixed (byte* fixedSrcPtr = &srcRefBytes)
         fixed (byte* fixedDestPtr = destPixels)

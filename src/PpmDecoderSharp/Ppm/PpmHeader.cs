@@ -18,6 +18,7 @@ internal sealed partial record PpmHeader(
 {
     private const int HeaderAllocSize = 512;    // ♪コメントを含んでいたら足りないかも
 
+    /// <inheritdoc />
     public int Channels => Format switch
     {
         PpmPixmapFormat.P1 or PpmPixmapFormat.P4 => 1,  // B/W
@@ -26,7 +27,7 @@ internal sealed partial record PpmHeader(
         _ => throw new NotSupportedException($"Not supported format : {Format}")
     };
 
-    /// <summary>Depth</summary>
+    /// <inheritdoc />
     public int BitsPerPixel
     {
         // bitは隙間なく詰められる前提としています
@@ -49,7 +50,7 @@ internal sealed partial record PpmHeader(
         }
     }
 
-    /// <summary>Depth</summary>
+    /// <inheritdoc />
     public int BytesPerPixel
     {
         get
@@ -67,8 +68,11 @@ internal sealed partial record PpmHeader(
         }
     }
 
-    /// <summary>Size of pixels only, excluding header</summary>
-    public int PixelsAllocatedSize => Height * Width * BytesPerPixel;
+    /// <inheritdoc />
+    public int Stride => Width * BytesPerPixel;
+
+    /// <inheritdoc />
+    public int PixelsAllocatedSize => Height * Stride;
 
     internal static PpmHeader? Create(PpmPixmapFormat format, int width, int height, int maxLevel, int pixelOffset, string? comment)
     {
