@@ -34,3 +34,14 @@ internal enum PpmPixmapFormat
     /// </summary>
     P6 = 6
 }
+
+internal static class PpmPixmapFormatExtension
+{
+    internal static int GetChannelCount(this PpmPixmapFormat format) => format switch
+    {
+        PpmPixmapFormat.P1 or PpmPixmapFormat.P4 => 1,
+        PpmPixmapFormat.P2 or PpmPixmapFormat.P5 => 1,
+        PpmPixmapFormat.P3 or PpmPixmapFormat.P6 => 3,
+        _ => throw new NotSupportedException()
+    };
+}

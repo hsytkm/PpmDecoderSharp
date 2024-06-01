@@ -29,7 +29,7 @@ public static class PpmImageReader
     {
         ArgumentNullException.ThrowIfNull(stream);
 
-        var header = await PpmHeader.CreateAsync(stream, cancellationToken);
+        var header = await PpmHeaderUtil.CreateAsync(stream, cancellationToken);
         if (header is null)
             return null;
 

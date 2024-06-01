@@ -4,8 +4,43 @@ namespace PpmDecoderSharp;
 
 public static class RawImageReader
 {
+    /// <summary>Read raw image from stream</summary>
+    public static async Task<IImage?> ReadAsync(
+        Stream? stream, int width, int height, int rawBits, int stride, int pixelOffset,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(stream);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(height);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(rawBits);
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(stride, GetBurstStride(width, height, rawBits));
+        ArgumentOutOfRangeException.ThrowIfNegative(pixelOffset);
+
+        int maxLevel = (1 << rawBits) - 1;
+
+        // Read raw image using P5(1ch binary)
+        var header = PpmHeaderUtil.Create(PpmPixmapFormat.P5, width, height, maxLevel, pixelOffset, null);
+        if (header is null)
+            return null;
+
+        byte[] pixels = await PpmReadHelper.ReadAsync(stream, header, cancellationToken);
+        return new RawImage(header, pixels);
+    }
+
+    /// <summary>Read raw image from stream</summary>
+    public static async Task<IImage?> ReadAsync(
+        Stream? stream, int width, int height, int rawBits,
+        CancellationToken cancellationToken = default)
+    {
+        const int pixelOffset = 0;
+        int stride = GetBurstStride(width, height, rawBits);
+        return await ReadAsync(stream, width, height, rawBits, stride, pixelOffset, cancellationToken);
+    }
+
     /// <summary>Read raw image from file</summary>
-    public static async Task<IImage?> ReadAsync(string? filePath, int width, int height, int rawBits, int pixelOffset, CancellationToken cancellationToken = default)
+    public static async Task<IImage?> ReadAsync(
+        string? filePath, int width, int height, int rawBits, int stride, int pixelOffset,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(filePath);
 
@@ -15,7 +50,7 @@ public static class RawImageReader
         try
         {
             using var stream = File.OpenRead(filePath);
-            return await ReadAsync(stream, width, height, rawBits, pixelOffset, cancellationToken);
+            return await ReadAsync(stream, width, height, rawBits, stride, pixelOffset, cancellationToken);
         }
         catch (IOException)
         {
@@ -24,23 +59,24 @@ public static class RawImageReader
         }
     }
 
-    /// <summary>Read raw image from stream</summary>
-    public static async Task<IImage?> ReadAsync(Stream? stream, int width, int height, int rawBits, int pixelOffset, CancellationToken cancellationToken = default)
+    /// <summary>Read raw image from file</summary>
+    public static async Task<IImage?> ReadAsync(
+        string? filePath, int width, int height, int rawBits,
+        CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(stream);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(height);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(rawBits);
-        ArgumentOutOfRangeException.ThrowIfNegative(pixelOffset);
+        const int pixelOffset = 0;
+        int stride = GetBurstStride(width, height, rawBits);
+        return await ReadAsync(filePath, width, height, rawBits, stride, pixelOffset, cancellationToken);
+    }
 
-        int maxLevel = (1 << rawBits) - 1;
-
-        // Read raw image using P5(1ch binary)
-        var header = PpmHeader.Create(PpmPixmapFormat.P5, width, height, maxLevel, pixelOffset, null);
-        if (header is null)
-            return null;
-
-        byte[] pixels = await PpmReadHelper.ReadAsync(stream, header, cancellationToken);
-        return new RawImage(header, pixels);
+    private static int GetBurstStride(int width, int height, int rawBits)
+    {
+        int pixelPerBytes = rawBits switch
+        {
+            <= 8 => 1,
+            <= 16 => 2,
+            _ => throw new NotSupportedException()
+        };
+        return height * width * pixelPerBytes;
     }
 }
