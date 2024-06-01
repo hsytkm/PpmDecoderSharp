@@ -35,12 +35,12 @@ public static class RawImageReader
 
         int maxLevel = (1 << rawBits) - 1;
 
-        // Read raw image using P5(binary 1ch)
+        // Read raw image using P5(1ch binary)
         var header = PpmHeader.Create(PpmPixmapFormat.P5, width, height, maxLevel, pixelOffset, null);
         if (header is null)
             return null;
 
         byte[] pixels = await PpmReadHelper.ReadAsync(stream, header, cancellationToken);
-        return new PpmImage(header, pixels);
+        return new RawImage(header, pixels);
     }
 }
