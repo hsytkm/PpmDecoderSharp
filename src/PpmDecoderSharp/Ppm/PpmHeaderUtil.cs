@@ -44,18 +44,13 @@ internal static partial class PpmHeaderUtil
     // ♪private化したい。テスト用にinternal
     internal static PpmHeader? ParseHeaderText(string headerText)
     {
-        if (headerText.Length < 2)
-            return null;
-
-        return headerText.AsSpan()[0..2] switch
+        var format = PpmPixmapFormatExtension.GetPixmapFormat(headerText);
+        return format switch
         {
-            "P1" => ParseHeaderTextWithoutMax(PpmPixmapFormat.P1, headerText),
-            "P2" => ParseHeaderTextWithMax(PpmPixmapFormat.P2, headerText),
-            "P3" => ParseHeaderTextWithMax(PpmPixmapFormat.P3, headerText),
-            "P4" => ParseHeaderTextWithoutMax(PpmPixmapFormat.P4, headerText),
-            "P5" => ParseHeaderTextWithMax(PpmPixmapFormat.P5, headerText),
-            "P6" => ParseHeaderTextWithMax(PpmPixmapFormat.P6, headerText),
-            _ => null,
+            PpmPixmapFormat.P1 or PpmPixmapFormat.P4 => ParseHeaderTextWithoutMax(format, headerText),
+            PpmPixmapFormat.P2 or PpmPixmapFormat.P5 or
+            PpmPixmapFormat.P3 or PpmPixmapFormat.P6 => ParseHeaderTextWithMax(format, headerText),
+            _ => null
         };
     }
 

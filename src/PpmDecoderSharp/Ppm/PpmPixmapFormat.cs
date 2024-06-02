@@ -37,6 +37,23 @@ internal enum PpmPixmapFormat
 
 internal static class PpmPixmapFormatExtension
 {
+    internal static PpmPixmapFormat GetPixmapFormat(string headerText)
+    {
+        if (headerText.Length < 2)
+            return PpmPixmapFormat.Undefined;
+
+        return headerText.AsSpan()[0..2] switch
+        {
+            "P1" => PpmPixmapFormat.P1,
+            "P2" => PpmPixmapFormat.P2,
+            "P3" => PpmPixmapFormat.P3,
+            "P4" => PpmPixmapFormat.P4,
+            "P5" => PpmPixmapFormat.P5,
+            "P6" => PpmPixmapFormat.P6,
+            _ => PpmPixmapFormat.Undefined
+        };
+    }
+
     internal static int GetChannelCount(this PpmPixmapFormat format) => format switch
     {
         PpmPixmapFormat.P1 or PpmPixmapFormat.P4 => 1,

@@ -243,7 +243,7 @@ internal static class PpmReadHelper
         }
     }
 
-    // P5 (internal for RawReader)
+    // P5
     private static async Task<byte[]> ReadP5Async(Stream stream, IImageHeader header, CancellationToken cancellationToken)
         => await ReadP6Async(stream, header, cancellationToken);
 
