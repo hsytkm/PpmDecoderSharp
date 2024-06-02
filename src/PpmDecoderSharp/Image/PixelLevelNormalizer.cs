@@ -15,7 +15,7 @@ internal static class PixelLevelNormalizer
     };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int GetDestPixelsSize(IImageHeader header) => header.Height * header.Width * header.ChannelCount;    // fixed 1Byte
+    private static int GetDestPixelsSize(IImageHeader header) => header.Height * header.Stride;
 
     private static unsafe byte[] Get8bitPixels_LessThan255(IImageHeader header, byte[] sourcePixels)
     {

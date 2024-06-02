@@ -2,20 +2,32 @@
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace PpmDecoderSharp.Wpf;
+namespace PpmDecoderSharp.Wpf.Extensions;
 
-public static class PpmImageExtensions
+public static class IImageExtensions
 {
     private const double Dpi = 96.0;
 
-    public static BitmapSource ToBitmapSourceWithNormalization(this IImage image, bool isFreeze = true)
+    /// <summary>
+    /// Normalize the maximum value of the image to 8 bits.
+    /// </summary>
+    public static BitmapSource? ToBitmapSourceWithNormalization(this IImage? image, bool isFreeze = true)
     {
+        if (image is null)
+            return null;
+
         var pixelsSpan = image.GetNormalized8bitPixels();
         return ToBitmapSource(image, pixelsSpan, isFreeze);
     }
 
-    public static BitmapSource ToBitmapSourceWithBitShift(this IImage image, int bitShift, bool isFreeze = true)
+    /// <summary>
+    /// Gets an 8-bit image with the specified bit shift applied.
+    /// </summary>
+    public static BitmapSource? ToBitmapSourceWithBitShift(this IImage? image, int bitShift = 0, bool isFreeze = true)
     {
+        if (image is null)
+            return null;
+
         var pixelsSpan = image.GetBitShifted8bitPixels(bitShift);
         return ToBitmapSource(image, pixelsSpan, isFreeze);
     }

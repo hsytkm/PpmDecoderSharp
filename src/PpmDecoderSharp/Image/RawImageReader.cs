@@ -9,12 +9,14 @@ public static class RawImageReader
         Stream? stream, int width, int height, int rawBits, int stride, int pixelOffset = 0,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(stream);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(height);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(rawBits);
         ArgumentOutOfRangeException.ThrowIfLessThan(stride, GetRawBurstStride(width, rawBits));
         ArgumentOutOfRangeException.ThrowIfNegative(pixelOffset);
+
+        if (stream is null)
+            return null;
 
         int maxLevel = (1 << rawBits) - 1;
 
@@ -41,8 +43,6 @@ public static class RawImageReader
         string? filePath, int width, int height, int rawBits, int stride, int pixelOffset = 0,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(filePath);
-
         if (!File.Exists(filePath))
             return null;
 

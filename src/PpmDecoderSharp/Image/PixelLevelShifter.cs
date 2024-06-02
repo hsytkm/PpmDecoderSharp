@@ -14,7 +14,7 @@ internal static class PixelLevelShifter
     };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int GetDestPixelsSize(IImageHeader header) => header.Height * header.Width * header.ChannelCount;    // fixed 1Byte
+    private static int GetDestPixelsSize(IImageHeader header) => header.Height * header.Stride;
 
     private static unsafe byte[] Get8bitPixels_1Byte(IImageHeader header, byte[] sourcePixels, int bitShift)
     {
