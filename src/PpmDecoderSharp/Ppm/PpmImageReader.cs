@@ -7,8 +7,6 @@ public static class PpmImageReader
     /// <summary>Read pbm/pgm/ppm image from file</summary>
     public static async Task<IPpmImage?> ReadAsync(string? filePath, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(filePath);
-
         if (!File.Exists(filePath))
             return null;
 
@@ -29,7 +27,7 @@ public static class PpmImageReader
     {
         ArgumentNullException.ThrowIfNull(stream);
 
-        var header = await PpmHeader.CreateAsync(stream, cancellationToken);
+        var header = await PpmHeaderUtil.CreateAsync(stream, cancellationToken);
         if (header is null)
             return null;
 

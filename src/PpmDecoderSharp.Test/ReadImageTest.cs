@@ -51,11 +51,31 @@ public class ReadImageTest
         image.Height.Should().Be(height);
         image.MaxLevel.Should().Be(maxLevel);
         image.Comment.Should().Be(comment);
+        image.Stride.Should().Be(GetStride(formatNumber, width, maxLevel));
 
         var actualHash = new byte[32];    // 256bit=32Byte
         System.Security.Cryptography.SHA256.TryHashData(image.GetRawPixels(), actualHash, out int bytesWritten).Should().BeTrue();
 
         var actualHashString = BitConverter.ToString(actualHash.AsSpan()[..bytesWritten].ToArray()).Replace("-", "");
         actualHashString.Should().Be(expectedHashString);
+    }
+
+    private static int GetStride(int formatNumber, int width, int maxLevel)
+    {
+        int bytesPerChannel = maxLevel switch
+        {
+            <= 0xff => 1,
+            <= 0xffff => 2,
+            _ => throw new NotImplementedException(),
+        };
+        int channelCount = formatNumber switch
+        {
+            1 or 4 => 1,
+            2 or 5 => 1,
+            3 or 6 => 3,
+            _ => throw new NotImplementedException(),
+        };
+        int bytesPerPixel = bytesPerChannel * channelCount;
+        return width * bytesPerPixel;   // ppm is always burst memory.
     }
 }

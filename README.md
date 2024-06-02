@@ -4,9 +4,9 @@ Decode Portable PixMap images in .NET8.
 
 
 
-## PixMap Format
+## About PixMap
 
-**Header**
+**Header format**
 
 ```
 P<x>
@@ -43,7 +43,12 @@ P6
 IPpmImage ppmImage = await PpmImageReader.ReadAsync(@"C:\image.ppm");
 
 // Read raw image
-IImage rawImage = await RawImageReader.ReadAsync((@"C:\image.raw", 1920, 1080, 12, 0);
+(int width, int height, int pixelBits) = (640, 480, 12);
+IImage rawImage1 = await RawImageReader.ReadAsync(@"C:\image1.raw", width, height, pixelBits);
+
+// Read raw image with stride/Offset
+(int stride, int pixelOffset) = (643, 0x10);
+IImage rawImage2 = await RawImageReader.ReadAsync(@"C:\image2.raw", width, height, pixelBits, stride, pixelOffset);
 ```
 
 

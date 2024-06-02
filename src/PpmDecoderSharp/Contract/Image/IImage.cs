@@ -12,7 +12,7 @@ public interface IImage
     int MaxLevel { get; }
 
     /// <summary>Gray=1,Color=3</summary>
-    int Channels { get; }
+    int ChannelCount { get; }
 
     /// <summary>Multiplication result of Channels and Depth.</summary>
     int BitsPerPixel { get; }

@@ -21,7 +21,7 @@ public class ParseHeaderTest
     {
         var expected = new HeaderRecord(type, width, height, maxLevel, comment);
 
-        var header = PpmHeader.ParseHeaderText(headerText);
+        var header = PpmHeaderUtil.ParseHeaderText(headerText);
         Assert.NotNull(header);
 
         var actual = HeaderRecord.Create(header);
@@ -40,7 +40,7 @@ public class ParseHeaderTest
     [InlineData("P\n2 3\n4")]
     public void ParseHeaderText_Failed(string headerText)
     {
-        var header = PpmHeader.ParseHeaderText(headerText);
+        var header = PpmHeaderUtil.ParseHeaderText(headerText);
         header.Should().BeNull();
     }
 

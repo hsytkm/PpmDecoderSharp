@@ -13,12 +13,8 @@ internal static class PixelLevelShifter
         _ => throw new NotImplementedException($"Not supported format. ({header.MaxLevel})")
     };
 
-    // continuous assumption
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int GetSrcStride(IImageHeader header) => header.Width * header.BytesPerPixel;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int GetDestPixelsSize(IImageHeader header) => header.Height * header.Width * header.Channels;
+    private static int GetDestPixelsSize(IImageHeader header) => header.Height * header.Stride;
 
     private static unsafe byte[] Get8bitPixels_1Byte(IImageHeader header, byte[] sourcePixels, int bitShift)
     {
@@ -65,7 +61,7 @@ internal static class PixelLevelShifter
         var destPixels = new byte[destPixelsSize];
 
         ref readonly byte srcRefBytes = ref MemoryMarshal.AsRef<byte>(sourcePixels);
-        (int srcHeight, int srcStride) = (header.Height, GetSrcStride(header));
+        (int srcHeight, int srcStride) = (header.Height, header.Stride);
 
         fixed (byte* fixedSrcPtr = &srcRefBytes)
         fixed (byte* fixedDestPtr = destPixels)

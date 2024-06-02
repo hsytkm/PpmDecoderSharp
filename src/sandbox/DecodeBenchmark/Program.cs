@@ -39,7 +39,7 @@ public class DecodePpm
     public async ValueTask ReadHeader()
     {
         using var stream = File.OpenRead(_imageFilePath!);
-        _ = await PpmDecoderSharp.PpmHeader.CreateAsync(stream, default);
+        _ = await PpmDecoderSharp.PpmHeaderUtil.CreateAsync(stream, default);
     }
 
     [Benchmark]

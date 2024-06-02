@@ -64,7 +64,7 @@ internal sealed class BitmapImage
 
         var bitmap = CreateHeader(width, height, bitsPerPixel);
         int destStride = bitmap.Stride;
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(srcStride, destStride);
+        uint copyRowSize = (uint)Math.Min(srcStride, destStride);
 
         ref readonly byte srcRefBytes = ref MemoryMarshal.AsRef<byte>(sourcePixels);
         ref readonly byte destRefBytes = ref MemoryMarshal.AsRef<byte>(bitmap.GetPixelsSpan());
@@ -77,7 +77,7 @@ internal sealed class BitmapImage
             {
                 byte* srcRowHead = srcHead + ((height - 1 - y) * srcStride);
                 byte* destRowHead = destHead + (y * destStride);
-                Unsafe.CopyBlockUnaligned(destRowHead, srcRowHead, (uint)srcStride);
+                Unsafe.CopyBlockUnaligned(destRowHead, srcRowHead, copyRowSize);
             }
         }
         return bitmap;
@@ -90,7 +90,6 @@ internal sealed class BitmapImage
 
         var bitmap = CreateHeader(width, height, bitsPerPixel);
         int destStride = bitmap.Stride;
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(srcStride, destStride);
 
         ref readonly byte srcRefBytes = ref MemoryMarshal.AsRef<byte>(sourcePixels);
         ref readonly byte destRefBytes = ref MemoryMarshal.AsRef<byte>(bitmap.GetPixelsSpan());
