@@ -18,9 +18,9 @@ public static class RawImageReader
         if (stream is null)
             return null;
 
+        int channel = 1;
         int maxLevel = (1 << rawBits) - 1;
-
-        var header = new RawHeader(width, height, maxLevel, rawBits, stride, pixelOffset);
+        RawHeader header = new(width, height, channel, maxLevel, rawBits, stride, pixelOffset);
         if (header is null)
             return null;
 

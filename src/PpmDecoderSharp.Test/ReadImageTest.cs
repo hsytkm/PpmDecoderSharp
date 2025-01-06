@@ -3,6 +3,23 @@
 public class ReadImageTest
 {
     [Theory]
+    [InlineData("a1.pbm", true)]
+    [InlineData("a2.pgm", true)]
+    [InlineData("a3.ppm", true)]
+    //
+    [InlineData(null, false)]
+    [InlineData("", false)]
+    [InlineData("x1.txt", false)]
+    [InlineData("x2.bmp", false)]
+    [InlineData("x3.ppmx", false)]
+    [InlineData("ppm", false)]
+    public void FileExtension(string? filePath, bool expected)
+    {
+        var isSupported = PpmImageReader.IsSupportedExtension(filePath);
+        isSupported.Should().Be(expected);
+    }
+
+    [Theory]
     // P1
     [InlineData(Consts.ImagePathP1_1, 1, 200, 200, 1, "ASCII PBM file created by PBMA_WRITE.", "2399113CE95C46823B7F505908FBBD35610E8D7EE6D7929B55B2BFE0538D2AF5")]
     [InlineData(Consts.ImagePathP1_2, 1, 24, 7, 1, "feep.pbm", "124F8B6DA89837147EEB811819306B852059A7319AF7CFABD819145D190C4C60")]

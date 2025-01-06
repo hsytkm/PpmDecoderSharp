@@ -4,6 +4,14 @@ namespace PpmDecoderSharp;
 
 public static class PpmImageReader
 {
+    /// <summary>Check supported extension</summary>
+    public static bool IsSupportedExtension(string? filePath) =>
+        Path.GetExtension(filePath)?.ToLowerInvariant() switch
+        {
+            ".pbm" or ".pgm" or ".ppm" => true,
+            _ => false
+        };
+
     /// <summary>Read pbm/pgm/ppm image from file</summary>
     public static async Task<IPpmImage?> ReadAsync(string? filePath, CancellationToken cancellationToken = default)
     {

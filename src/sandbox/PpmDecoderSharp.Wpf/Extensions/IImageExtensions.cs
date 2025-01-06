@@ -42,8 +42,7 @@ public static class IImageExtensions
             _ => throw new NotSupportedException($"Ch={image.ChannelCount}")
         };
 
-        ref readonly byte refPixels = ref MemoryMarshal.AsRef<byte>(pixelsSpan);
-        fixed (byte* ptr = &refPixels)
+        fixed (byte* ptr = pixelsSpan)
         {
             var bitmap = BitmapSource.Create(
                 imageWidth, imageHeight, Dpi, Dpi, pixelFormat, null,

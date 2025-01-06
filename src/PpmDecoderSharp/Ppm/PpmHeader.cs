@@ -12,7 +12,7 @@ internal sealed record PpmHeader : RawHeader, IPpmHeader
     public string? Comment { get; }
 
     internal PpmHeader(PpmPixmapFormat format, int width, int height, int maxLevel, int pixelOffset, string? comment)
-        : base(width, height, maxLevel, GetPixelPerBits(format, maxLevel), GetStride(format, width, maxLevel), pixelOffset)
+        : base(width, height, format.GetChannelCount(), maxLevel, GetPixelPerBits(format, maxLevel), GetStride(format, width, maxLevel), pixelOffset)
     {
         (Format, Comment) = (format, comment);
     }

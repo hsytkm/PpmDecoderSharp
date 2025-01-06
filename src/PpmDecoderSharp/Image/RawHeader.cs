@@ -12,6 +12,9 @@ internal /*sealed*/ record RawHeader : IImageHeader
     public int MaxLevel { get; }
 
     /// <inheritdoc />
+    public int ChannelCount { get; }
+
+    /// <inheritdoc />
     public int PixelBits { get; }
 
     /// <inheritdoc />
@@ -20,13 +23,11 @@ internal /*sealed*/ record RawHeader : IImageHeader
     /// <inheritdoc />
     public int PixelOffset { get; }
 
-    internal RawHeader(int width, int height, int maxLevel, int pixelBits, int stride, int pixelOffset)
+    internal RawHeader(int width, int height, int channel, int maxLevel, int pixelBits, int stride, int pixelOffset)
     {
-        (Width, Height, MaxLevel, PixelBits, Stride, PixelOffset) = (width, height, maxLevel, pixelBits, stride, pixelOffset);
+        (Width, Height, ChannelCount) = (width, height, channel);
+        (MaxLevel, PixelBits, Stride, PixelOffset) = (maxLevel, pixelBits, stride, pixelOffset);
     }
-
-    /// <inheritdoc />
-    public int ChannelCount => (int)Math.Ceiling(PixelBits / 8f);
 
     /// <inheritdoc />
     public int BitsPerPixel

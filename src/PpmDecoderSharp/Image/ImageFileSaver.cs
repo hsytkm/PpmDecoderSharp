@@ -27,9 +27,8 @@ internal static class ImageFileSaver
 
     private static MemoryStream GetNormalizedBitmapStream(IImage image)
     {
-        (int width, int height, int channels) = (image.Width, image.Height, image.ChannelCount);
-        int bytesPerPixel = channels;   // normalize 8bit
-        int bitsPerPixel = bytesPerPixel * 8;
+        (int width, int height) = (image.Width, image.Height);
+        int bitsPerPixel = image.BytesPerPixel * 8;
         int stride = image.Stride;
         var pixels = image.GetNormalized8bitPixels();
         var bitmap = BitmapImage.Create(width, height, bitsPerPixel, stride, pixels);
@@ -56,9 +55,8 @@ internal static class ImageFileSaver
 
     private static MemoryStream GetBitShiftedBitmapStream(IImage image, int bitShift)
     {
-        (int width, int height, int channels) = (image.Width, image.Height, image.ChannelCount);
-        int bytesPerPixel = channels;   // normalize 8bit
-        int bitsPerPixel = bytesPerPixel * 8;
+        (int width, int height) = (image.Width, image.Height);
+        int bitsPerPixel = image.BytesPerPixel * 8;
         int stride = image.Stride;
         var pixels = image.GetBitShifted8bitPixels(bitShift);
         var bitmap = BitmapImage.Create(width, height, bitsPerPixel, stride, pixels);
