@@ -27,11 +27,11 @@ internal static class ImageFileSaver
 
     private static MemoryStream GetNormalizedBitmapStream(IImage image)
     {
-        (int width, int height) = (image.Width, image.Height);
-        int bitsPerPixel = image.BytesPerPixel * 8;
-        int stride = image.Stride;
-        var pixels = image.GetNormalized8bitPixels();
-        var bitmap = BitmapImage.Create(width, height, bitsPerPixel, stride, pixels);
+        var image8bit = image.GetNormalized8bitImage();
+        (int width, int height) = (image8bit.Width, image8bit.Height);
+        int bitsPerPixel = image8bit.BytesPerPixel * 8;
+        int stride = image8bit.Stride;
+        var bitmap = BitmapImage.Create(width, height, bitsPerPixel, stride, image8bit.GetRawPixels());
         return bitmap.ToMemoryStream();
     }
 

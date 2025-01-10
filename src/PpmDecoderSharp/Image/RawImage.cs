@@ -35,7 +35,18 @@ internal /*sealed*/ class RawImage : IImage
     public ReadOnlySpan<byte> GetRawPixels() => _pixels.AsSpan();
 
     /// <inheritdoc/>
-    public ReadOnlySpan<byte> GetNormalized8bitPixels() => PixelLevelNormalizer.Get8bitPixels(_header, _pixels);
+    public IImage GetNormalized8bitImage()
+    {
+        var header = _header;
+        var pixels = PixelLevelNormalizer.Get8bitPixels(header, _pixels);
+        (int width, int height, int channel) = (header.Width, header.Height, header.ChannelCount);
+        int maxLevel = 255;
+        int pixelBits = 8;
+        int stride = width * channel;
+        int pixelOffset = 0;
+        RawHeader newHeader = new(width, height, channel, maxLevel, pixelBits, stride, pixelOffset);
+        return new RawImage(newHeader, pixels);
+    }
 
     /// <inheritdoc/>
     public void SaveNormalizedBitmapToFile(string? filePath)
