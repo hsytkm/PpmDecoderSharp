@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -17,7 +17,7 @@
     <RepositoryUrl>https://github.com/hsytkm/PpmDecoderSharp</RepositoryUrl>
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageTags>pbm/pgm/ppm</PackageTags>
-    <Copyright>Copyright (c) 2024 thinva</Copyright>
+    <Copyright>Copyright (c) 2025 thinva</Copyright>
     <RepositoryType>git</RepositoryType>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
